@@ -90,7 +90,7 @@ jobs:
           # assignee_trigger: "claude-bot"
 
           # Serena MCPと実装に必要なツールへのアクセスを拡張
-          allowed_tools: "Bash(npm run dev),Bash(npm run build),Bash(npm run lint),Bash(npm start),Bash(npm install),Bash(npm),Bash(npm test),Bash(npm run test),Bash(git status),Bash(git diff),Bash(git branch),Bash(git checkout),Bash(git fetch),Bash(git pull),Bash(git add),Bash(git commit),Bash(git push),Bash(git push --force-with-lease),mcp__github__create_issue,mcp__github__update_issue,mcp__github__list_issues,mcp__github__get_issue,mcp__serena__*,FileEdit,FileCreate,FileRead"
+          allowed_tools: "Bash(npm run dev),Bash(npm run build),Bash(npm run lint),Bash(npm start),Bash(npm install),Bash(npm),Bash(npm test),Bash(npm run test),Bash(git status),Bash(git diff),Bash(git branch),Bash(git checkout),Bash(git fetch),Bash(git pull),Bash(git add),Bash(git commit),Bash(git push),Bash(git push --force-with-lease),Bash(sqlite3),Bash(sqlite3 data.db),Bash(sqlite3 data.db *),mcp__github__create_issue,mcp__github__update_issue,mcp__github__list_issues,mcp__github__get_issue,mcp__serena__*,FileEdit,FileCreate,FileRead"
 
           # Serena MCPを活用した高度なカスタム指示
           custom_instructions: |
@@ -141,6 +141,13 @@ jobs:
             - CSVデータのインポート処理の最適化
             - データ分析とレポート生成の実装
             - レスポンシブデザインの実装
+
+            # SQLiteデータベースの活用
+            - データベーススキーマの確認：`sqlite3 data.db ".schema"` でテーブル構造を確認
+            - データの確認：`sqlite3 data.db "SELECT * FROM テーブル名 LIMIT 10;"` でサンプルデータを表示
+            - テーブル一覧：`sqlite3 data.db ".tables"` で全テーブルを確認
+            - データ分析時は既存のデータ構造を理解してから実装を開始
+            - 新規テーブル作成時は既存スキーマとの整合性を保つ
 
             # Serena MCPを活用した高度な分析
             - コード変更の影響範囲分析：`mcp__serena__search_for_pattern`を使用して依存関係を特定

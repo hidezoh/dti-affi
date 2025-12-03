@@ -132,7 +132,16 @@ jobs:
             - パフォーマンスの考慮
             - ユーザビリティの向上
 
-            ## 7. Serena MCPによる高度な分析
+            ## 7. データベース変更のレビュー観点
+            データベース関連の変更がある場合は、以下を確認してください：
+            - `sqlite3 data.db ".schema"` でスキーマを確認
+            - `sqlite3 data.db ".tables"` でテーブル一覧を確認
+            - マイグレーションスクリプトの妥当性
+            - 既存データとの互換性
+            - インデックスの適切な設定
+            - 外部キー制約の整合性
+
+            ## 8. Serena MCPによる高度な分析
             - コード変更の影響範囲分析：依存関係の影響を特定
             - 非推奨関数の検出：プロジェクト全体での使用箇所を確認
             - アーキテクチャの一貫性チェック：既存パターンとの整合性
@@ -148,5 +157,5 @@ jobs:
           use_sticky_comment: false
 
           # Serena MCPとレビューに必要なツールを追加
-          allowed_tools: "Bash(npm run lint),Bash(npm run build),Bash(npm run dev --dry-run),Bash(npm test),Bash(npm run test),mcp__github__comment__update_claude_comment,mcp__github__create_issue,mcp__github__update_issue,mcp__serena__onboarding,mcp__serena__find_file,mcp__serena__list_dir,mcp__serena__find_symbol,mcp__serena__search_for_pattern,mcp__serena__get_symbols_overview,mcp__serena__find_referencing_symbols,mcp__serena__write_memory,mcp__serena__read_memory,mcp__serena__list_memories,mcp__serena__delete_memory,mcp__serena__activate_project,mcp__serena__switch_modes,mcp__serena__get_current_config,mcp__serena__check_onboarding_performed,mcp__serena__think_about_collected_information,mcp__serena__think_about_task_adherence,mcp__serena__think_about_whether_you_are_done,mcp__serena__prepare_for_new_conversation"
+          allowed_tools: "Bash(npm run lint),Bash(npm run build),Bash(npm run dev --dry-run),Bash(npm test),Bash(npm run test),Bash(sqlite3),Bash(sqlite3 data.db),Bash(sqlite3 data.db *),mcp__github__comment__update_claude_comment,mcp__github__create_issue,mcp__github__update_issue,mcp__serena__onboarding,mcp__serena__find_file,mcp__serena__list_dir,mcp__serena__find_symbol,mcp__serena__search_for_pattern,mcp__serena__get_symbols_overview,mcp__serena__find_referencing_symbols,mcp__serena__write_memory,mcp__serena__read_memory,mcp__serena__list_memories,mcp__serena__delete_memory,mcp__serena__activate_project,mcp__serena__switch_modes,mcp__serena__get_current_config,mcp__serena__check_onboarding_performed,mcp__serena__think_about_collected_information,mcp__serena__think_about_task_adherence,mcp__serena__think_about_whether_you_are_done,mcp__serena__prepare_for_new_conversation"
 
