@@ -1,7 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const { parse } = require('csv-parse/sync');
-const Database = require('better-sqlite3');
+import fs from 'fs';
+import path from 'path';
+import { parse } from 'csv-parse/sync';
+import Database from 'better-sqlite3';
+
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DATA_DIR = path.join(__dirname, '../data');
 const DB_PATH = path.join(__dirname, '../data.db');

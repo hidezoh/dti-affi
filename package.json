@@ -2,6 +2,7 @@
   "name": "dti-affi",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,8 +13,11 @@
     "better-sqlite3": "^12.5.0",
     "csv-parse": "^6.1.0",
     "next": "16.0.6",
+    "pdf-parse": "^1.1.1",
+    "pdf2pic": "^3.1.2",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
