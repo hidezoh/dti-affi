@@ -30,6 +30,7 @@ jobs:
         with:
           fetch-depth: 0      # 完全な履歴を取得（実装時に役立つ）
           token: ${{ secrets.GITHUB_TOKEN }}
+          lfs: true           # Git LFSファイルを正しく処理
           # プルリクエストのソースブランチをチェックアウト
           ref: ${{ github.event.pull_request.head.ref || github.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
