@@ -4,7 +4,7 @@
  * 例: node scripts/download-ad-images.js "113019_002" "caribbeancom"
  */
 
-import { downloadImageMaterials, AD_SITES } from '../src/lib/ad-materials.js';
+import { downloadImageMaterials, AD_SITES } from '../src/lib/ad-materials.ts';
 
 async function main() {
   const args = process.argv.slice(2);

@@ -184,15 +184,28 @@ export async function downloadAndExtractImages(
         
         // 画像ファイルのみを処理
         if (imageExtensions.includes(fileExtension) && !entry.isDirectory) {
-          const outputPath = path.join(imageDirectory, fileName);
+          // パストラバーサル攻撃を防ぐためのセキュリティチェック
+          const sanitizedFileName = path.basename(fileName);
+          if (sanitizedFileName !== fileName || fileName.includes('..') || path.isAbsolute(fileName)) {
+            console.warn(`安全でないファイル名をスキップ: ${fileName}`);
+            continue;
+          }
+          
+          const outputPath = path.join(imageDirectory, sanitizedFileName);
           const outputDir = path.dirname(outputPath);
+          
+          // outputPathがimageDirectory内にあることを確認
+          if (!outputPath.startsWith(imageDirectory)) {
+            console.warn(`安全でないパスをスキップ: ${fileName}`);
+            continue;
+          }
           
           if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true });
           }
 
           zip.extractEntryTo(entry, outputDir, false, true);
-          extractedFiles.push(fileName);
+          extractedFiles.push(sanitizedFileName);
           
           console.log(`画像ファイルを保存: ${outputPath}`);
         }
@@ -374,7 +387,7 @@ export async function downloadImageMaterials(
     const materialId = saveAdMaterialRecord({
       videoId,
       siteId,
-      imageZipUrl: zipUrl,
+      imageZipUrl: zipUrl || undefined,
       imageZipDownloaded: true,
       imageDirectory: downloadResult.imageDirectory,
       embedCodeAvailable: false
