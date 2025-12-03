@@ -12,13 +12,14 @@ export interface AdSiteConfig {
   id: string;
   siteName: string;
   siteUrl: string;
-  imageZipUrlPattern: string;
+  imageZipUrlPattern: string | null;
   hasEmbedCode: boolean;
   notes?: string;
 }
 
-// 裏技_Ad_tips.mdから抽出したサイト設定
+// 裏技_Ad_tips.mdとPuppeteer分析から抽出したサイト設定
 export const AD_SITES: AdSiteConfig[] = [
+  // Phase 3で実装済みの7サイト（静的URLパターン）
   {
     id: 'caribbeancom',
     siteName: 'カリビアンコム',
@@ -74,6 +75,104 @@ export const AD_SITES: AdSiteConfig[] = [
     imageZipUrlPattern: '/moviepages/{id}/index.zip',
     hasEmbedCode: true,
     notes: '作品によっては提供されない場合がある'
+  },
+  
+  // Puppeteer分析で新たに追加された12サイト
+  {
+    id: 'nozox',
+    siteName: 'NOZOX',
+    siteUrl: 'https://www.nozox.com',
+    imageZipUrlPattern: '/download/gallery.zip', // 専用ダウンロードページ
+    hasEmbedCode: true,
+    notes: '専用Zipダウンロードページを持つ唯一のサイト'
+  },
+  {
+    id: 'heydouga',
+    siteName: 'Hey動画',
+    siteUrl: 'https://www.heydouga.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '画像ZIPは提供せず、埋め込みコードのみ'
+  },
+  {
+    id: 'h4610',
+    siteName: 'エッチな4610',
+    siteUrl: 'https://www.h4610.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: 'h0930',
+    siteName: 'エッチな0930',
+    siteUrl: 'https://www.h0930.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: 'h0930world',
+    siteName: 'エッチな0930WORLD',
+    siteUrl: 'https://www.h0930.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: 'エッチな0930のワールド版、埋め込みコードのみ'
+  },
+  {
+    id: 'hitozuma_giri',
+    siteName: '人妻斬り',
+    siteUrl: 'https://www.hitozuma-giri.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: 'h0230',
+    siteName: 'エッチな0230',
+    siteUrl: 'https://www.h0230.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: 'unkotare',
+    siteName: 'うんこたれ',
+    siteUrl: 'https://www.unkotare.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: '3d_eros',
+    siteName: '3D-EROS.NET',
+    siteUrl: 'https://www.3d-eros.net',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: 'pikkur',
+    siteName: 'Pikkur',
+    siteUrl: 'https://www.pikkur.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: 'javholic',
+    siteName: 'Javholic',
+    siteUrl: 'https://www.javholic.com',
+    imageZipUrlPattern: null, // ZIPなし
+    hasEmbedCode: true,
+    notes: '埋め込みコードのみ提供'
+  },
+  {
+    id: 'caribbeancompr',
+    siteName: 'カリビアンコムプレミアム',
+    siteUrl: 'https://www.caribbeancompr.com',
+    imageZipUrlPattern: '/moviepages/{id}/images/gallery.zip', // 通常版と同じパターン推定
+    hasEmbedCode: true,
+    notes: 'カリビアンコム通常版と同様の構造と推定、要検証'
   }
 ];
 
@@ -110,6 +209,11 @@ export function generateImageZipUrl(siteId: string, videoId: string): string | n
     throw new Error(`サポートされていないサイトID: ${siteId}`);
   }
 
+  // 画像ZIPを提供しないサイトの場合はnullを返す
+  if (!siteConfig.imageZipUrlPattern) {
+    return null;
+  }
+
   const zipUrl = siteConfig.siteUrl + siteConfig.imageZipUrlPattern.replace('{id}', videoId);
   return zipUrl;
 }
@@ -140,7 +244,7 @@ export async function downloadAndExtractImages(
       // ZIP URLを生成
       const zipUrl = generateImageZipUrl(siteId, videoId);
       if (!zipUrl) {
-        return { success: false, error: `サイト設定が見つかりません: ${siteId}` };
+        return { success: false, error: `このサイトは画像ZIPを提供していません: ${siteId}` };
       }
 
       console.log(`[試行 ${attempt}] ZIP ダウンロード開始: ${zipUrl}`);

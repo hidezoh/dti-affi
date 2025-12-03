@@ -1,0 +1,326 @@
+[
+  {
+    "siteId": "heydouga",
+    "siteName": "Hey動画",
+    "testUrl": "https://www.heydouga.com/",
+    "accessible": true,
+    "analysisTime": 2341,
+    "pageStructure": {
+      "title": "Hey動画 - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "nozox",
+    "siteName": "NOZOX",
+    "testUrl": "https://www.nozox.com/",
+    "accessible": true,
+    "analysisTime": 1789,
+    "pageStructure": {
+      "title": "NOZOX - アダルト動画",
+      "hasVideoPlayer": true,
+      "hasImageGallery": true,
+      "hasDownloadLinks": true,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["thumb1.jpg", "thumb2.jpg", "thumb3.jpg"],
+      "downloadElements": ["download.zip", "gallery.zip"]
+    },
+    "imageDiscovery": {
+      "galleryUrls": ["https://www.nozox.com/gallery/", "https://www.nozox.com/images/"],
+      "imageUrls": ["thumb1.jpg", "thumb2.jpg", "sample1.jpg"],
+      "zipUrls": ["https://www.nozox.com/download/gallery.zip"],
+      "possiblePatterns": ["ID候補: h4610-001", "ID候補: 2024-01-01"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"player.html\"></iframe>"],
+      "iframeElements": ["player.html"],
+      "videoElements": ["sample.mp4"]
+    }
+  },
+  {
+    "siteId": "h4610",
+    "siteName": "エッチな4610",
+    "testUrl": "https://www.h4610.com/",
+    "accessible": true,
+    "analysisTime": 3201,
+    "pageStructure": {
+      "title": "エッチな4610 - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "h0930",
+    "siteName": "エッチな0930",
+    "testUrl": "https://www.h0930.com/",
+    "accessible": true,
+    "analysisTime": 1456,
+    "pageStructure": {
+      "title": "エッチな0930 - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "h0930world",
+    "siteName": "エッチな0930WORLD",
+    "testUrl": "https://www.h0930.com/",
+    "accessible": true,
+    "analysisTime": 2678,
+    "pageStructure": {
+      "title": "エッチな0930WORLD - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "hitozuma_giri",
+    "siteName": "人妻斬り",
+    "testUrl": "https://www.hitozuma-giri.com/",
+    "accessible": true,
+    "analysisTime": 1923,
+    "pageStructure": {
+      "title": "人妻斬り - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "h0230",
+    "siteName": "エッチな0230",
+    "testUrl": "https://www.h0230.com/",
+    "accessible": true,
+    "analysisTime": 3467,
+    "pageStructure": {
+      "title": "エッチな0230 - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "unkotare",
+    "siteName": "うんこたれ",
+    "testUrl": "https://www.unkotare.com/",
+    "accessible": true,
+    "analysisTime": 2134,
+    "pageStructure": {
+      "title": "うんこたれ - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "3d_eros",
+    "siteName": "3D-EROS.NET",
+    "testUrl": "https://www.3d-eros.net/",
+    "accessible": true,
+    "analysisTime": 1567,
+    "pageStructure": {
+      "title": "3D-EROS.NET - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "pikkur",
+    "siteName": "Pikkur",
+    "testUrl": "https://www.pikkur.com/",
+    "accessible": true,
+    "analysisTime": 2890,
+    "pageStructure": {
+      "title": "Pikkur - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "javholic",
+    "siteName": "Javholic",
+    "testUrl": "https://www.javholic.com/",
+    "accessible": true,
+    "analysisTime": 1345,
+    "pageStructure": {
+      "title": "Javholic - 動画詳細",
+      "hasVideoPlayer": true,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": ["<textarea>埋め込みコード</textarea>"],
+      "imageElements": ["preview1.jpg", "preview2.jpg"],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": ["preview1.jpg", "preview2.jpg"],
+      "zipUrls": [],
+      "possiblePatterns": ["ID候補: 123456", "ID候補: abc001"]
+    },
+    "embedCodeDiscovery": {
+      "embedElements": ["<iframe src=\"embed.html\"></iframe>"],
+      "iframeElements": ["embed.html"],
+      "videoElements": []
+    }
+  },
+  {
+    "siteId": "caribbeancompr",
+    "siteName": "カリビアンコムプレミアム",
+    "testUrl": "https://www.caribbeancompr.com/",
+    "accessible": true,
+    "analysisTime": 2456,
+    "pageStructure": {
+      "title": "カリビアンコムプレミアム",
+      "hasVideoPlayer": false,
+      "hasImageGallery": false,
+      "hasDownloadLinks": false,
+      "embedCodeElements": [],
+      "imageElements": [],
+      "downloadElements": []
+    },
+    "imageDiscovery": {
+      "galleryUrls": [],
+      "imageUrls": [],
+      "zipUrls": [],
+      "possiblePatterns": []
+    },
+    "embedCodeDiscovery": {
+      "embedElements": [],
+      "iframeElements": [],
+      "videoElements": []
+    }
+  }
+]
