@@ -1,0 +1,250 @@
+name: Claude Code
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # ファイル編集に必要
+      pull-requests: write     # PR更新に必要
+      issues: write           # Issue作成・更新に必要
+      id-token: write
+      actions: read           # CI結果読み込みに必要
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0      # 完全な履歴を取得（実装時に役立つ）
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # プルリクエストのソースブランチをチェックアウト
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Serena MCPサーバーの設定を明示的に指定
+          mcp_config: |
+            {
+              "mcpServers": {
+                "serena": {
+                  "command": "uvx",
+                  "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server"],
+                  "env": {
+                    "SERENA_PROJECT_PATH": "/home/runner/work/dti-affi/dti-affi"
+                  }
+                }
+              }
+            }
+
+          # CI結果読み込み権限
+          additional_permissions: |
+            actions: read
+            issues: write
+            pull-requests: write
+            contents: write
+
+          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
+          # model: "claude-opus-4-20250514"
+
+          # Optional: Customize the trigger phrase (default: @claude)
+          # trigger_phrase: "/claude"
+
+          # Optional: Trigger when specific user is assigned to an issue
+          # assignee_trigger: "claude-bot"
+
+          # Serena MCPと実装に必要なツールへのアクセスを拡張
+          allowed_tools: "Bash(npm run dev),Bash(npm run build),Bash(npm run lint),Bash(npm start),Bash(npm install),Bash(npm),Bash(npm test),Bash(npm run test),Bash(git status),Bash(git diff),Bash(git branch),Bash(git checkout),Bash(git fetch),Bash(git pull),Bash(git add),Bash(git commit),Bash(git push),Bash(git push --force-with-lease),mcp__github__create_issue,mcp__github__update_issue,mcp__github__list_issues,mcp__github__get_issue,mcp__serena__*,FileEdit,FileCreate,FileRead"
+
+          # Serena MCPを活用した高度なカスタム指示
+          custom_instructions: |
+            # 基本設定
+            - 回答は必ず日本語で行う
+            - 説明はわかりやすい表現で具体的に記述する
+            - 実装時は段階的にタスクを分解し、進捗を明確にする
+
+            # Serena MCPの活用
+            - 実装開始前に必ず `mcp__serena__onboarding` を実行し、プロジェクトの全体構造を理解する
+            - コード分析時は `mcp__serena__search_for_pattern` を活用してセマンティックな検索を行う
+            - ファイル操作時は `mcp__serena__read_file` を使用してコンテキストを正確に把握する
+            - プロジェクト構造の理解には `mcp__serena__list_dir` を活用する
+
+            # 実装前の必須チェック
+            - 実装開始前に必ず `npm run lint` を実行し、既存のエラーを確認する
+            - エラーがある場合は先に修正してから新しい実装を開始する
+            - 実装後も `npm run lint` で品質を確認する
+
+            # Next.js 16開発ルール
+            - Next.js 16アプリケーションの実装時は以下の順序で作業する：
+              1. 必要な依存関係の確認・追加（package.json）
+              2. 型定義の実装（types/、interfaces/）
+              3. サーバーサイドAPIの実装（app/api/）
+              4. コンポーネントの実装（components/）
+              5. ページの実装（app/）
+              6. ユーティリティ関数の実装（lib/、utils/）
+              7. 設定の調整（next.config.ts）
+              8. テストコードの作成
+              9. 統合とテスト実行
+
+            # コード品質要件
+            - TypeScriptの型安全性を重視し、any型の使用は最小限に留める
+            - React Server Components と Client Components を適切に使い分ける
+            - リアクティブなデータはuseState、useEffectを適切に使用する
+            - 非同期処理ではasync/awaitを適切に使用する
+            - エラーハンドリングを適切に実装する
+
+            # Next.js 16固有のベストプラクティス
+            - App Routerを使用した実装
+            - Server Componentsをデフォルトとし、必要な場合のみClient Componentsを使用
+            - データフェッチングはServer Componentsで行う
+            - Tailwind CSSを活用したスタイリング
+            - SEO対策を考慮したメタデータの設定
+
+            # アフィリエイト管理アプリケーション固有の考慮事項
+            - SQLite3データベースとの連携を適切に実装
+            - CSVデータのインポート処理の最適化
+            - データ分析とレポート生成の実装
+            - レスポンシブデザインの実装
+
+            # Serena MCPを活用した高度な分析
+            - コード変更の影響範囲分析：`mcp__serena__search_for_pattern`を使用して依存関係を特定
+            - 非推奨関数の検出：プロジェクト全体で非推奨APIの使用箇所を特定
+            - アーキテクチャの一貫性チェック：既存のパターンとの整合性を確認
+            - セキュリティ脆弱性の検出：危険なパターンの使用箇所を特定
+
+            # 実装時のベストプラクティス
+            - 新機能実装時は対応するテストコードも必ず作成する
+            - エラーハンドリングを適切に実装する
+            - デバッグ用コードは console.log を使用し、本番では削除または条件付きで実行
+            - コメントは日本語で記述し、実装の意図を明確にする
+            - 環境変数の適切な管理
+
+            # 実装完了時のチェックリスト
+            1. `npm run lint` でエラー・警告がないことを確認
+            2. `npm run build` でビルドが成功することを確認
+            3. 不要なインポートやデバッグコードの削除
+            4. 実装内容の動作確認
+
+            # プルリクエスト実装時の特別な考慮事項
+            - プルリクエストのブランチワークフロー：
+              1. プルリクエストのソースブランチを特定・チェックアウト
+              2. そのブランチで実装作業を実行
+              3. 実装完了後、プッシュ前に必ず以下を実行：
+                 a. `git fetch origin` で最新の状態を取得
+                 b. `git status` で現在の状態を確認
+                 c. リモートに新しい変更がある場合は `git pull origin <ブランチ名>` を実行
+              4. 同じブランチにコミット・プッシュ
+              5. プッシュエラーが発生した場合は `git push --force-with-lease` を使用
+              6. これによりプルリクエストが自動的に更新される
+            - 既存コードへの影響を最小限に抑える
+            - 破壊的変更がある場合は事前に警告する
+            - 段階的なコミットで変更履歴を明確にする
+            - 実装完了後は必ず動作テストの結果を報告する
+
+            # Issue管理・サブタスク作成
+            - コメントでサブタスクIssue作成を依頼された場合：
+              1. `mcp__github__create_issue` でサブタスクIssueを作成
+              2. 適切なタイトルと詳細な説明を設定
+              3. 親タスク（元のIssueやPR）への参照を含める
+              4. 適切なラベルやアサインを設定
+              5. 作成したIssue番号を返信で報告
+            - Issue作成時の必須項目：
+              - 明確で具体的なタイトル
+              - 実装内容の詳細説明
+              - 受け入れ条件（Acceptance Criteria）
+              - 関連Issue/PRへの参照リンク
+              - 適切な優先度ラベル
+            - サブタスクの分類例：
+              - `enhancement`: 新機能追加
+              - `bug`: バグ修正
+              - `documentation`: ドキュメント更新
+              - `testing`: テスト関連
+              - `refactor`: リファクタリング
+
+            # エラー対応
+            - ビルドエラーや実行時エラーが発生した場合は、詳細な原因分析を行う
+            - 解決策を複数提示し、最適な方法を推奨する
+            - 必要に応じて関連ドキュメントや参考リンクも提供する
+            - Issue作成エラー対応手順：
+              1. 権限エラーの場合は `mcp__github__create_issue` を使用
+              2. ネットワークエラーの場合は再試行
+              3. バリデーションエラーの場合は入力内容を修正
+            - Gitプッシュエラー対応手順：
+              1. エラーメッセージを確認し、原因を特定
+              2. `git fetch origin` で最新状態を取得
+              3. `git status` で競合状況を確認
+              4. 必要に応じて `git pull origin <ブランチ名>` で最新変更をマージ
+              5. 競合が発生した場合は適切に解決
+              6. 再度コミット・プッシュを実行
+              7. 安全が確認できれば `--force-with-lease` オプションを使用
+
+            # MCPツールの使用方法
+            - Issue作成: `mcp__github__create_issue` を使用
+              - title: 必須、明確で具体的なタイトル
+              - body: 詳細な説明、受け入れ条件、関連リンク
+              - labels: 適切なラベル（推奨: bug, enhancement, documentation, refactor, critical, high, medium, low）
+              - assignees: 担当者の指定（必要に応じて）
+            - Issue更新: `mcp__github__update_issue` を使用
+              - issue_number: 更新対象のIssue番号
+              - 更新内容の指定
+            - Issue一覧: `mcp__github__list_issues` を使用
+              - 既存Issueの確認
+              - 重複チェック
+            - Issue詳細: `mcp__github__get_issue` を使用
+              - 特定Issueの詳細取得
+              - 関連情報の確認
+
+            # Serena MCPツールの使用方法
+            - プロジェクト分析: `mcp__serena__onboarding` を使用
+              - プロジェクトの全体構造と技術スタックを理解
+              - 実装開始前の必須ステップ
+            - ファイル読み取り: `mcp__serena__read_file` を使用
+              - 特定ファイルの内容を正確に取得
+              - コンテキストを理解した上での実装
+            - セマンティック検索: `mcp__serena__search_for_pattern` を使用
+              - コードパターンや関数の使用箇所を特定
+              - 依存関係の影響範囲を分析
+            - ディレクトリ一覧: `mcp__serena__list_dir` を使用
+              - プロジェクト構造の把握
+              - 適切なファイル配置の確認
+
+          # Optional: Custom environment variables for Claude
+          # claude_env: |
+          #   NODE_ENV: test
+

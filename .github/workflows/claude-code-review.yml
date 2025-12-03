@@ -1,0 +1,152 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "src/**/*.tsx"
+      - "src/**/*.ts"
+      - "app/**/*.tsx"
+      - "app/**/*.ts"
+      - "components/**/*.tsx"
+      - "components/**/*.ts"
+      - "lib/**/*.ts"
+      - "utils/**/*.ts"
+      - "scripts/**/*.ts"
+      - "**/*.md"
+      - "next.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    # Skip review for certain conditions
+    if: |
+      !contains(github.event.pull_request.title, '[skip-review]') &&
+      !contains(github.event.pull_request.title, '[WIP]') &&
+      !contains(github.event.pull_request.title, 'docs:') &&
+      !contains(github.event.pull_request.title, 'chore:')
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Botトリガーを許可（ClaudeやGitHub Actionsなど）
+          allowed_bots: "claude,claude[bot],github-actions[bot],dependabot[bot]"
+          # Serena MCPサーバーの設定を明示的に指定
+          mcp_config: |
+            {
+              "mcpServers": {
+                "serena": {
+                  "command": "uvx",
+                  "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server"],
+                  "env": {
+                    "SERENA_PROJECT_PATH": "/home/runner/work/dti-affi/dti-affi"
+                  }
+                }
+              }
+            }
+
+          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
+          # model: "claude-opus-4-20250514"
+
+          # Serena MCPを活用した高度なレビュープロンプト
+          direct_prompt: |
+            このプルリクエストをSerena MCPを活用してレビューし、以下の観点からフィードバックを提供してください：
+
+            ## 事前準備
+            1. まず`mcp__serena__onboarding`を実行し、プロジェクトの全体構造を理解してください
+            2. 変更されたファイルについて`mcp__serena__find_symbol`を使用してコンテキストを把握してください
+            3. 必要に応じて`mcp__serena__search_for_pattern`を使用して依存関係を分析してください
+
+            ## 1. プロセス管理の観点
+            - このPRは設計書や要件定義に基づいているか
+            - 重要な技術的意思決定がある場合、その理由は明確か
+            - 変更の影響範囲は適切に考慮されているか
+
+            ## 2. 技術品質の観点
+            - コード品質とベストプラクティスの遵守
+            - 潜在的なバグや問題点の特定
+            - パフォーマンスに関する考慮事項
+            - セキュリティ上の懸念事項
+            - テストカバレッジと品質
+
+            ## 3. アーキテクチャの観点
+            - Next.js 16のベストプラクティスに従っているか
+            - App Routerの適切な使用
+            - Server ComponentsとClient Componentsの適切な使い分け
+            - TypeScriptの型安全性の確保
+            - Tailwind CSSの適切な活用
+            - 既存のコードスタイルと一貫性があるか
+
+            ## 4. 個人開発における注意点
+            - 実装が先行しすぎていないか（設計の考慮は十分か）
+            - 将来の拡張性を考慮しているか
+            - 技術的負債を生んでいないか
+
+            ## 5. Next.js 16/React/TypeScript固有の観点
+            - Server ComponentsとClient Componentsの適切な使い分け
+            - TypeScriptの型定義が適切か
+            - Reactフックの適切な使用
+            - 適切なエラーハンドリングがされているか
+            - SSR/SSGの考慮事項
+
+            ## 6. アフィリエイト管理アプリケーション固有の観点
+            - SQLite3データベースとの連携が適切か
+            - CSVデータ処理の実装が適切か
+            - データ分析機能の実装が適切か
+            - パフォーマンスの考慮
+            - ユーザビリティの向上
+
+            ## 7. Serena MCPによる高度な分析
+            - コード変更の影響範囲分析：依存関係の影響を特定
+            - 非推奨関数の検出：プロジェクト全体での使用箇所を確認
+            - アーキテクチャの一貫性チェック：既存パターンとの整合性
+            - セキュリティ脆弱性の検出：危険なパターンの使用箇所
+
+            建設的で役立つフィードバックを心がけ、改善提案は具体的に記載してください。
+            個人開発プロジェクトであることを考慮し、過度に厳格でなくバランスの取れたレビューを行ってください。
+
+            レビューは日本語で記載してください。
+
+          # Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
+          # コメントを上書きせず、新しいコメントとして投稿
+          use_sticky_comment: false
+
+          # Serena MCPとレビューに必要なツールを追加
+          allowed_tools: "Bash(npm run lint),Bash(npm run build),Bash(npm run dev --dry-run),Bash(npm test),Bash(npm run test),mcp__github__comment__update_claude_comment,mcp__github__create_issue,mcp__github__update_issue,mcp__serena__onboarding,mcp__serena__find_file,mcp__serena__list_dir,mcp__serena__find_symbol,mcp__serena__search_for_pattern,mcp__serena__get_symbols_overview,mcp__serena__find_referencing_symbols,mcp__serena__write_memory,mcp__serena__read_memory,mcp__serena__list_memories,mcp__serena__delete_memory,mcp__serena__activate_project,mcp__serena__switch_modes,mcp__serena__get_current_config,mcp__serena__check_onboarding_performed,mcp__serena__think_about_collected_information,mcp__serena__think_about_task_adherence,mcp__serena__think_about_whether_you_are_done,mcp__serena__prepare_for_new_conversation"
+
