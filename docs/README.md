@@ -51,6 +51,27 @@ Meilisearch + Cloudflare構成でのバッチ処理戦略
 
 ---
 
+### [lightsail-groonga-evaluation.md](./lightsail-groonga-evaluation.md)
+
+Lightsail + Nuxt 3 + Groonga構成の評価
+
+**内容**：
+- AWS Lightsail + Groonga全文検索エンジンの技術評価
+- 既存プロジェクト（minogashi-ssr）での実装詳細と実績
+- Groongaの高度な日本語検索機能（MeCab形態素解析・読み仮名検索）
+- コスト・運用負荷・スケーラビリティの詳細分析
+- Meilisearch + Cloudflare構成との比較
+
+**結論**: **Meilisearch + Cloudflare構成を推奨**
+- 理由: 運用負荷ほぼゼロ、無限スケーラビリティ、Issue #6要件に最適
+- Groonga構成は技術的に優秀だが、Phase 1無料運用要件に不適合
+
+**スコア**: Meilisearch + CF: 26/30 | Lightsail + Groonga: 18/30
+
+**関連Issue**: [#6 D案（アフィリエイトリダイレクト）のインフラコスト最適化](https://github.com/hidezoh/dti-affi/issues/6)
+
+---
+
 ## ドキュメント管理方針
 
 - **マークダウン形式**: 通常のGit管理（LFS使用なし）
