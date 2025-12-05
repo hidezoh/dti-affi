@@ -35,6 +35,22 @@
 
 ---
 
+### [meilisearch-batch-update-strategy.md](./meilisearch-batch-update-strategy.md)
+
+Meilisearch + Cloudflare構成でのバッチ処理戦略
+
+**内容**：
+- 現在のCSVバッチ処理からMeilisearchへの移行方法
+- 3つの実装アプローチ（ローカル実行・GitHub Actions・Cloudflare Workers Cron）
+- バッチ更新の具体的な実装例とコスト影響
+- Cloudflare D1との併用戦略
+
+**推奨**: ローカル実行のバッチスクリプト（Phase 1）→ GitHub Actions自動化（Phase 2）
+
+**関連Issue**: [#6 D案（アフィリエイトリダイレクト）のインフラコスト最適化](https://github.com/hidezoh/dti-affi/issues/6)
+
+---
+
 ## ドキュメント管理方針
 
 - **マークダウン形式**: 通常のGit管理（LFS使用なし）
