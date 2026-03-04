@@ -1,6 +1,8 @@
 import { getVideoById } from '@/lib/db';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ThumbnailManager from '@/components/ThumbnailManager';
+import ThumbnailPreview from '@/components/ThumbnailPreview';
 
 interface PageProps {
     params: {
@@ -83,6 +85,34 @@ export default function VideoPage({ params }: PageProps) {
                             <div className="mt-6 pt-6 border-t border-zinc-800 text-xs text-zinc-500 text-center">
                                 ID: {video.id} • 提供: {video.provider_name || 'N/A'}
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* サムネイル管理セクション */}
+                <div className="mt-12 pt-8 border-t border-zinc-800">
+                    <h2 className="text-xl font-bold text-white mb-6">サムネイル管理</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* プレビューエリア */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-white mb-4">プライマリサムネイル</h3>
+                            <ThumbnailPreview 
+                                videoId={video.id} 
+                                size="large" 
+                                showDetails={true}
+                                className="mb-4"
+                            />
+                            <div className="text-sm text-zinc-400">
+                                この画像がアフィリエイトサイトでのメイン表示に使用されます。
+                            </div>
+                        </div>
+
+                        {/* 管理エリア */}
+                        <div>
+                            <ThumbnailManager 
+                                videoId={video.id} 
+                                siteId={video.site_id} 
+                            />
                         </div>
                     </div>
                 </div>
