@@ -1,4 +1,5 @@
 import { MeiliSearch } from 'meilisearch';
+import type { Video } from '../types/video.js';
 
 // Meilisearch接続設定
 const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST || 'http://localhost:7700';
@@ -33,21 +34,9 @@ export function createSearchClient(): MeiliSearch {
   });
 }
 
-// Meilisearch用の動画ドキュメント型
-export interface MeilisearchVideo {
-  id: string;
-  site_id: string;
-  site_name: string;
-  title: string;
-  actress: string;
-  description: string;
-  release_date: string;
-  sample_url: string;
-  aff_link: string;
-  original_id: string;
-  sample_movie_url_2: string;
-  provider_name: string;
-}
+// 共通型を再エクスポート（後方互換）
+export type { Video };
+export type { Video as MeilisearchVideo };
 
 // videosインデックスの設定
 export const VIDEOS_INDEX_SETTINGS = {

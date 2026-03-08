@@ -1,5 +1,8 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import type { Video } from '../types/video.js';
+
+export type { Video };
 
 const DB_PATH = path.join(process.cwd(), 'data.db');
 
@@ -16,20 +19,6 @@ try {
     throw error;
 }
 
-export interface Video {
-    id: string;
-    site_id: string;
-    site_name: string;
-    title: string;
-    actress: string;
-    description: string;
-    release_date: string;
-    sample_url: string;
-    aff_link: string;
-    original_id: string;
-    sample_movie_url_2: string;
-    provider_name: string;
-}
 
 export function getLatestVideos(limit = 20): Video[] {
     const stmt = db.prepare('SELECT * FROM videos ORDER BY release_date DESC LIMIT ?');

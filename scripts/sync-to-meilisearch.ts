@@ -21,7 +21,7 @@ import {
   createAdminClient,
   VIDEOS_INDEX,
   BATCH_SIZE,
-  type MeilisearchVideo,
+  type Video,
 } from '../src/lib/meilisearch.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -70,7 +70,7 @@ async function syncToMeilisearch() {
   console.log(`\nCSVファイル数: ${files.length}`);
 
   // 全CSVファイルからドキュメントを収集
-  const allDocuments: MeilisearchVideo[] = [];
+  const allDocuments: Video[] = [];
   let skippedCount = 0;
 
   for (const file of files) {
