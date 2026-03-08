@@ -26,6 +26,7 @@
 **内容**：
 - Issue #6における検索インフラの技術検討プロセス
 - LIKE検索からSQLite FTS5、Convex、Meilisearch + Cloudflareまでの評価経緯
+- フレームワーク選定（Hono SSR採用）の経緯と理由
 - 日本語全文検索の課題と各ソリューションの比較
 - コスト・性能・日本語対応の観点での分析結果
 
@@ -37,11 +38,12 @@
 
 ### [meilisearch-batch-update-strategy.md](./meilisearch-batch-update-strategy.md)
 
-Meilisearch + Cloudflare構成でのバッチ処理戦略
+Meilisearch + Hono SSR + Cloudflare構成でのバッチ処理戦略
 
 **内容**：
 - 現在のCSVバッチ処理からMeilisearchへの移行方法
 - 3つの実装アプローチ（ローカル実行・GitHub Actions・Cloudflare Workers Cron）
+- Honoアプリとの統合方法（Workers Cron + `fetch: app.fetch`）
 - バッチ更新の具体的な実装例とコスト影響
 - Cloudflare D1との併用戦略
 

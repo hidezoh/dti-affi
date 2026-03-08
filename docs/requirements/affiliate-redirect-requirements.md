@@ -31,7 +31,7 @@
 | 説明 | 新着動画を指定件数取得する |
 | 入力 | limit: number（デフォルト: 24） |
 | 出力 | Video[]（動画配列） |
-| 備考 | 既存の`getLatestVideos()`を使用 |
+| 備考 | Meilisearchの`index.search('', { sort: ['release_date:desc'] })`を使用 |
 
 | 機能ID | FR-002 |
 |--------|--------|
@@ -39,7 +39,7 @@
 | 説明 | IDを指定して動画詳細を取得する |
 | 入力 | id: string |
 | 出力 | Video \| undefined |
-| 備考 | 既存の`getVideoById()`を使用 |
+| 備考 | Meilisearchの`index.getDocument(id)`を使用 |
 
 | 機能ID | FR-003 |
 |--------|--------|
@@ -47,7 +47,7 @@
 | 説明 | キーワードで動画を検索する |
 | 入力 | query: string, limit: number |
 | 出力 | Video[]（検索結果） |
-| 備考 | タイトル・女優名で検索 |
+| 備考 | Meilisearchの`index.search(query)`を使用（日本語形態素解析対応） |
 
 #### 2.1.2 クリック統計取得（新規）
 | 機能ID | FR-004 |
@@ -67,7 +67,7 @@
 | 説明 | 新着動画をグリッド形式で表示する |
 | 表示項目 | サムネイル、タイトル、女優名、公開日 |
 | レイアウト | レスポンシブグリッド（1→2→3→4列） |
-| 備考 | 既存の`VideoCard`コンポーネントを使用 |
+| 備考 | `VideoCard`コンポーネント（hono/jsx版）を使用 |
 
 #### 2.2.2 動画詳細表示
 | 機能ID | FR-011 |
@@ -76,7 +76,7 @@
 | 説明 | 選択した動画の詳細情報を表示する |
 | 表示項目 | タイトル、女優名、説明、公開日、サンプル動画、サイト名 |
 | CTAボタン | 「今すぐ見る」ボタン（アフィリエイトリンク） |
-| 備考 | 既存の`/video/[id]/page.tsx`を拡張 |
+| 備考 | Honoルート`GET /video/:id`で実装 |
 
 #### 2.2.3 検索結果表示
 | 機能ID | FR-012 |
@@ -93,9 +93,9 @@
 |--------|--------|
 | 機能名 | アフィリエイトリダイレクト |
 | 説明 | 内部リンクからアフィリエイトサイトへリダイレクトする |
-| エンドポイント | `/api/redirect/[videoId]` |
+| エンドポイント | `/r/:videoId`（Honoルート） |
 | HTTPメソッド | GET |
-| 処理フロー | 1. videoIdから動画情報取得<br>2. クリックログ記録<br>3. aff_linkへ302リダイレクト |
+| 処理フロー | 1. videoIdからMeilisearchで動画情報取得<br>2. クリックログをCloudflare D1に非同期記録（`c.executionCtx.waitUntil`）<br>3. aff_linkへ302リダイレクト |
 | レスポンス | 302 Redirect |
 
 #### 2.3.2 クリックログ記録
@@ -104,14 +104,15 @@
 | 機能名 | クリックログ記録 |
 | 説明 | アフィリエイトリンククリック時にログを記録する |
 | 記録項目 | video_id, site_id, clicked_at, user_agent, referer, ip_hash |
-| 備考 | 個人を特定できる情報は保存しない（IPはハッシュ化） |
+| 保存先 | Cloudflare D1 |
+| 備考 | 個人を特定できる情報は保存しない（IPはSHA-256ハッシュ化） |
 
 #### 2.3.3 クリック統計API
 | 機能ID | FR-022 |
 |--------|--------|
 | 機能名 | クリック統計API |
 | 説明 | クリック統計データを取得するAPI |
-| エンドポイント | `/api/stats/clicks` |
+| エンドポイント | `/api/stats/clicks`（Honoルート） |
 | クエリパラメータ | period, site_id, group_by |
 | レスポンス | JSON形式の統計データ |
 
@@ -131,15 +132,15 @@
 | 項目 | 要件 |
 |------|------|
 | 個人情報 | IPアドレスはハッシュ化して保存 |
-| リダイレクトURL | データベースに登録されたURLのみ許可 |
-| SQLインジェクション | プリペアドステートメント使用 |
+| リダイレクトURL | Meilisearchに登録されたURLのみ許可 |
+| インジェクション対策 | Cloudflare D1プリペアドステートメント使用 |
 | XSS | 出力エスケープ処理 |
 
 ### 3.3 可用性
 | 項目 | 要件 |
 |------|------|
 | 稼働率 | 99%以上 |
-| データバックアップ | 日次（SQLiteファイル） |
+| データバックアップ | Cloudflare D1自動バックアップ、Meilisearchはバッチスクリプトで再投入可能 |
 
 ### 3.4 ユーザビリティ
 | 項目 | 要件 |
@@ -151,27 +152,31 @@
 
 ## 4. データ設計
 
-### 4.1 既存テーブル: videos
-```sql
--- 既存スキーマ（変更なし）
-CREATE TABLE videos (
-  id TEXT PRIMARY KEY,
-  site_id TEXT,
-  site_name TEXT,
-  title TEXT,
-  actress TEXT,
-  description TEXT,
-  release_date TEXT,
-  sample_url TEXT,
-  aff_link TEXT,
-  original_id TEXT,
-  sample_movie_url_2 TEXT,
-  provider_name TEXT
-);
+### 4.1 動画データ: Meilisearch Cloud
+
+動画データはMeilisearch Cloudのvideosインデックスに格納。CSVバッチスクリプトで投入・更新する。
+
+```typescript
+// Meilisearch videosインデックスのドキュメント構造
+interface Video {
+  id: string;          // プライマリキー（movie_id）
+  site_id: string;
+  site_name: string;
+  title: string;
+  actress: string;
+  description: string;
+  release_date: string;
+  sample_url: string;
+  aff_link: string;
+  original_id: string;
+  sample_movie_url_2: string;
+  provider_name: string;
+}
 ```
 
-### 4.2 新規テーブル: click_logs
+### 4.2 新規テーブル: click_logs（Cloudflare D1）
 ```sql
+-- Cloudflare D1上に作成
 CREATE TABLE click_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   video_id TEXT NOT NULL,
@@ -179,8 +184,7 @@ CREATE TABLE click_logs (
   clicked_at TEXT NOT NULL DEFAULT (datetime('now')),
   user_agent TEXT,
   referer TEXT,
-  ip_hash TEXT,
-  FOREIGN KEY (video_id) REFERENCES videos(id)
+  ip_hash TEXT
 );
 
 -- インデックス
@@ -189,7 +193,7 @@ CREATE INDEX idx_click_logs_site_id ON click_logs(site_id);
 CREATE INDEX idx_click_logs_clicked_at ON click_logs(clicked_at);
 ```
 
-### 4.3 ビュー: click_stats_daily
+### 4.3 ビュー: click_stats_daily（Cloudflare D1）
 ```sql
 CREATE VIEW click_stats_daily AS
 SELECT
@@ -207,14 +211,14 @@ GROUP BY date(clicked_at), video_id, site_id;
 
 ### 5.1 リダイレクトAPI
 
-#### エンドポイント
+#### エンドポイント（Honoルート）
 ```
-GET /api/redirect/[videoId]
+GET /r/:videoId
 ```
 
 #### リクエスト例
 ```
-GET /api/redirect/abc123
+GET /r/abc123
 ```
 
 #### レスポンス
@@ -233,7 +237,7 @@ Location: https://affiliate-site.com/path?param=value
 
 ### 5.2 クリック統計API
 
-#### エンドポイント
+#### エンドポイント（Honoルート）
 ```
 GET /api/stats/clicks
 ```
@@ -271,7 +275,7 @@ GET /api/stats/clicks
 #### CTAボタン変更
 ```
 変更前: href={video.aff_link}
-変更後: href={/api/redirect/${video.id}}
+変更後: href={`/r/${video.id}`}
 ```
 
 #### 追加表示項目
@@ -288,8 +292,8 @@ GET /api/stats/clicks
 ## 7. 実装計画
 
 ### Phase 1: 基盤実装
-1. `click_logs`テーブル作成
-2. リダイレクトAPI実装（`/api/redirect/[videoId]`）
+1. Cloudflare D1に`click_logs`テーブル作成
+2. Honoルート`GET /r/:videoId`でリダイレクト実装
 3. 動画詳細ページのCTAリンク変更
 
 ### Phase 2: 統計機能
@@ -307,7 +311,7 @@ GET /api/stats/clicks
 ## 8. 受け入れ条件
 
 ### 8.1 リダイレクト機能
-- [ ] `/api/redirect/[videoId]`でアフィリエイトサイトにリダイレクトされる
+- [ ] `/r/:videoId`でアフィリエイトサイトにリダイレクトされる
 - [ ] 存在しないvideoIdの場合、適切なエラーレスポンスが返る
 - [ ] リダイレクト時にクリックログが記録される
 - [ ] リダイレクト応答時間が100ms以内
@@ -343,7 +347,8 @@ GET /api/stats/clicks
 
 - [広告素材取得マニュアル](/docs/ad-tips.md)
 - [データ管理ガイド](/data/README.md)
-- [Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+- [Hono Documentation](https://hono.dev/docs/)
+- [Cloudflare D1 Documentation](https://developers.cloudflare.com/d1/)
 
 ---
 
@@ -352,3 +357,4 @@ GET /api/stats/clicks
 | バージョン | 日付 | 変更内容 | 担当 |
 |-----------|------|---------|------|
 | 1.0 | 2025-12-03 | 初版作成 | Claude |
+| 1.1 | 2026-03-08 | Hono SSR + Cloudflare構成への変更を反映 | Claude |
