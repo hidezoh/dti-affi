@@ -89,6 +89,34 @@ async function setupIndex() {
   );
   await client.tasks.waitForTask(displayedTask.taskUid);
 
+  // localizedAttributes（日本語形態素解析 - Lindera tokenizer）
+  console.log('  localizedAttributes を設定中（日本語形態素解析）...');
+  const localizedTask = await index.updateLocalizedAttributes(
+    VIDEOS_INDEX_SETTINGS.localizedAttributes as unknown as Array<{ locales: string[]; attributePatterns: string[] }>
+  );
+  await client.tasks.waitForTask(localizedTask.taskUid);
+
+  // typoTolerance（CJKテキスト向け調整）
+  console.log('  typoTolerance を設定中...');
+  const typoTask = await index.updateTypoTolerance(
+    VIDEOS_INDEX_SETTINGS.typoTolerance as unknown as { disableOnAttributes: string[] }
+  );
+  await client.tasks.waitForTask(typoTask.taskUid);
+
+  // pagination（大規模データセット対応）
+  console.log('  pagination を設定中...');
+  const paginationTask = await index.updatePagination(
+    VIDEOS_INDEX_SETTINGS.pagination as unknown as { maxTotalHits: number }
+  );
+  await client.tasks.waitForTask(paginationTask.taskUid);
+
+  // faceting（ファセット設定）
+  console.log('  faceting を設定中...');
+  const facetingTask = await index.updateFaceting(
+    VIDEOS_INDEX_SETTINGS.faceting as unknown as { maxValuesPerFacet: number }
+  );
+  await client.tasks.waitForTask(facetingTask.taskUid);
+
   // 設定内容の確認
   console.log('\n=== 適用された設定 ===');
   const settings = await index.getSettings();
