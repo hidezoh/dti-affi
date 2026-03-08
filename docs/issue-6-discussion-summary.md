@@ -543,7 +543,45 @@ export function searchVideosOptimized(query: string, limit = 20): Video[] {
 
 ---
 
+---
+
+## 🔧 フレームワーク選定: Hono SSR（hono/jsx）の採用
+
+### 検討した選択肢
+
+Meilisearch + Cloudflare構成の決定後、フロントエンド/バックエンドのフレームワークとしてHono SSR（hono/jsx）を採用した。
+
+| 案 | 構成 | SEO | 判定 |
+|----|------|-----|------|
+| 案A | Hono API + 静的SPA（React + Vite） | ❌ SPAでは11万件の動画ページがインデックスされない | 不採用 |
+| **案B** | **Hono SSR（hono/jsx）** | ✅ 完全なHTMLをエッジで生成 | **採用** |
+| 案C | HonoX（フルスタック） | ✅ Islands Architecture | ページ2つの規模にオーバースペック |
+
+### 採用理由
+
+1. **SEO最重要**: アフィリエイトサイトの収益は検索エンジン流入に直結。SSRで各動画ページが完全なHTMLとしてクローラーに提供される
+2. **現コードとの相性**: 現在のNext.js Server Components（Client Componentなし）→ hono/jsx SSRへの直接マッピングが可能
+3. **Cloudflare Workers最適化**: Cold start 0ms、グローバルエッジ300箇所以上で分散SSR
+4. **シンプルさ**: ページ2つ・コンポーネント1つの規模に対してHono SSRが最適
+
+### 最終的なアーキテクチャ
+
+```
+[ユーザー] → [Cloudflare CDN] → [Cloudflare Pages]
+                                       ↓
+                              [Hono SSR (hono/jsx)]
+                                       ↓
+                    ┌──────────────────┴────────────────────┐
+                    ↓                                       ↓
+             [Meilisearch Cloud]                    [Cloudflare D1]
+              (検索エンジン)                          (クリックログ)
+```
+
+**月額コスト**: 約¥4,350（Meilisearch Cloud $30 + Cloudflare無料プラン）
+
+---
+
 **作成日**: 2025年12月5日
-**更新日**: 2025年12月5日
-**ステータス**: ユーザー提案（Meilisearch + Cloudflare）を推奨
+**更新日**: 2026年3月8日
+**ステータス**: Meilisearch + Hono SSR + Cloudflare構成に決定
 **重要な教訓**: 環境制約（Vercel環境でのSQLite非サポート）の確認が不十分だった

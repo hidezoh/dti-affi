@@ -219,15 +219,17 @@ jobs:
 
 ---
 
-### 方法3: Cloudflare Workers Cronでの定期更新
+### 方法3: Cloudflare Workers Cronでの定期更新（Honoアプリ内）
 
-**定期的にCSVを取得してMeilisearchを更新**
+**Honoアプリのscheduledハンドラとして定期的にMeilisearchを更新**
 
 #### Cloudflare Workers Cron実装例
 
 ```typescript
-// workers/sync-cron.ts
+// Honoアプリのexportにscheduledハンドラを追加
+// src/index.tsx
 export default {
+  fetch: app.fetch, // Honoアプリのfetchハンドラ
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     // 1. R2からCSVファイルを取得（事前にアップロード済み）
     const csvFiles = await env.R2_BUCKET.list({ prefix: 'data/' });
@@ -430,4 +432,5 @@ async function syncBoth() {
 ---
 
 **作成日**: 2025年12月5日
+**更新日**: 2026年3月8日（Hono SSR構成への変更を反映）
 **関連ドキュメント**: [Issue #6検討経緯まとめ](./issue-6-discussion-summary.md)
