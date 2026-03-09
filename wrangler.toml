@@ -1,0 +1,27 @@
+# dti-affi: Hono SSR + Cloudflare Pages
+name = "dti-affi"
+compatibility_date = "2025-03-01"
+compatibility_flags = ["nodejs_compat"]
+
+# エントリポイント
+main = "src/index.tsx"
+
+# 静的アセットの配信（Tailwind CSSビルド出力等）
+[assets]
+directory = "./public"
+
+# 環境変数（本番はCloudflareダッシュボードで設定）
+[vars]
+# MEILISEARCH_HOST = ""
+# MEILISEARCH_SEARCH_API_KEY = ""
+
+# D1バインディング（将来用）
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "dti-affi-db"
+# database_id = ""
+
+# KVバインディング（将来用）
+# [[kv_namespaces]]
+# binding = "KV"
+# id = ""

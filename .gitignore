@@ -13,9 +13,12 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
+# cloudflare
+/.wrangler/
+/dist/
+
+# Tailwind CSSビルド出力
+/public/static/styles.css
 
 # production
 /build
@@ -34,12 +37,8 @@ yarn-error.log*
 .env*
 !.env.example
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # database
 # /data/
