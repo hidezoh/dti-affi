@@ -21,7 +21,8 @@
     "next": "16.0.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "undici": "^7.22.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
