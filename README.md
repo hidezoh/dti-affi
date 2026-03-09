@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# dti-affi
 
-## Getting Started
+アフィリエイト管理アプリケーション。Hono SSR + Cloudflare Pages で構築。
 
-First, run the development server:
+## 技術スタック
+
+- **Hono** — SSR フレームワーク（hono/jsx）
+- **Cloudflare Pages / Workers** — ホスティング・エッジ実行
+- **Meilisearch Cloud** — 全文検索エンジン（日本語形態素解析対応）
+- **TypeScript 5**
+- **Tailwind CSS v4**
+
+## セットアップ
+
+```bash
+npm install
+cp .env.example .env
+```
+
+`.env` に以下の環境変数を設定:
+
+```
+MEILISEARCH_HOST=https://ms-xxxxx.meilisearch.io
+MEILISEARCH_ADMIN_API_KEY=<管理用APIキー>
+MEILISEARCH_SEARCH_API_KEY=<検索用APIキー>
+```
+
+### Meilisearch の初期化
+
+```bash
+# インデックス作成・設定
+npm run meilisearch:setup
+
+# CSVデータの投入
+npm run meilisearch:sync
+```
+
+`data/` ディレクトリにCSVファイルを配置してから `meilisearch:sync` を実行してください。
+
+## 開発
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Wrangler の開発サーバーが起動します（デフォルト: http://localhost:8787）。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ビルド・デプロイ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# ビルド（Tailwind CSS + Wrangler dry-run）
+npm run build
 
-## Learn More
+# Cloudflare Pages にデプロイ
+npm run deploy
+```
 
-To learn more about Next.js, take a look at the following resources:
+本番環境の環境変数は Cloudflare ダッシュボードで設定してください。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## プロジェクト構成
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  index.tsx          # Hono エントリポイント（SSR ルーティング）
+  components/        # JSX コンポーネント
+  lib/               # Meilisearch クライアント等
+  styles/            # Tailwind CSS 入力ファイル
+  types/             # 型定義
+scripts/
+  setup-meilisearch.ts    # インデックス初期化
+  sync-to-meilisearch.ts  # CSV → Meilisearch データ投入
+public/              # 静的ファイル
+data/                # CSV データファイル
+```
 
-## Deploy on Vercel
+## npm scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| コマンド | 説明 |
+|---------|------|
+| `npm run dev` | 開発サーバー起動 |
+| `npm run build` | ビルド |
+| `npm run deploy` | Cloudflare Pages デプロイ |
+| `npm run lint` | ESLint 実行 |
+| `npm run meilisearch:setup` | Meilisearch インデックス初期化 |
+| `npm run meilisearch:sync` | CSV データを Meilisearch に同期 |
