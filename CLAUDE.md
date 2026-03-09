@@ -6,11 +6,10 @@
 
 **プロジェクト名**: dti-affi
 **技術スタック**:
-- Next.js 16 + React 19 — フルスタックフレームワーク
+- Hono 4 (SSR) + Cloudflare Pages/Workers — エッジSSRフレームワーク
 - TypeScript 5
 - Tailwind CSS v4
 - Meilisearch Cloud (Build Plan) — 全文検索エンジン（日本語形態素解析対応）
-- SQLite (better-sqlite3) — ローカルデータベース
 - CSV処理 (csv-parse) — バッチデータ投入用
 
 **プロジェクトの目的**: アフィリエイト管理アプリケーション
@@ -57,25 +56,26 @@
 
 ---
 
-## 📋 Next.js 開発ルール
+## 📋 Hono SSR 開発ルール
 
 ### 実装順序
-Next.jsアプリケーションの実装時は以下の順序で作業する：
+Hono SSRアプリケーションの実装時は以下の順序で作業する：
 
 1. **依存関係の確認・追加** (`package.json`)
 2. **型定義の実装** (`src/types/`)
 3. **Meilisearchクライアント・ユーティリティの実装** (`src/lib/`)
-4. **ページの実装** (`src/app/`)
+4. **ルートの実装** (`src/index.tsx`)
 5. **コンポーネントの実装** (`src/components/`)
 6. **テストコードの作成**
 7. **統合とテスト実行**
 
 ### ベストプラクティス
-- **Next.js App Router**: サーバーサイドレンダリングでSEOを確保
-- **データフェッチング**: Server Components内でMeilisearch SDKを使用
+- **Hono SSR**: Cloudflare Workers上でサーバーサイドレンダリング
+- **データフェッチング**: Honoルートハンドラ内でMeilisearch SDKを使用
 - **スタイリング**: Tailwind CSSを活用
 - **SEO**: SSRによるHTML返却で検索エンジンクローラビリティを確保
-- **ルーティング**: Next.js App Routerのファイルベースルーティングを使用
+- **ルーティング**: Honoのルーティング機能を使用（`src/index.tsx`）
+- **環境変数**: Cloudflare Worker Bindings（`c.env`）経由で取得
 
 ---
 
@@ -85,9 +85,9 @@ Next.jsアプリケーションの実装時は以下の順序で作業する：
 - 型安全性を重視し、`any`型の使用は最小限に留める
 - 適切な型定義を実装
 
-### React / JSX
-- Next.js App RouterのServer Componentsを活用
-- クライアントコンポーネントは必要最小限に（`'use client'`）
+### Hono JSX
+- Hono JSX（React互換）でコンポーネントを実装
+- サーバーサイドでの完全レンダリング（クライアントJSは最小限）
 - 非同期処理では`async/await`を適切に使用
 
 ### エラーハンドリング
@@ -234,7 +234,7 @@ Next.jsアプリケーションの実装時は以下の順序で作業する：
 - テストカバレッジと品質
 
 ### 3. アーキテクチャの観点
-- Next.js App Routerのベストプラクティスに従っているか
+- Hono SSR + Cloudflare Pagesのベストプラクティスに従っているか
 - ルーティングとレイアウトの適切な使用
 - SSRによるSEO確保が維持されているか
 - TypeScriptの型安全性の確保
@@ -246,8 +246,8 @@ Next.jsアプリケーションの実装時は以下の順序で作業する：
 - 将来の拡張性を考慮しているか
 - 技術的負債を生んでいないか
 
-### 5. Next.js/TypeScript固有の観点
-- Next.js App Routerによるサーバーサイドレンダリングが適切か
+### 5. Hono/TypeScript固有の観点
+- Hono SSRによるサーバーサイドレンダリングが適切か
 - TypeScriptの型定義が適切か
 - Meilisearch SDKの適切な使用
 - 適切なエラーハンドリングがされているか
@@ -317,12 +317,12 @@ Next.jsアプリケーションの実装時は以下の順序で作業する：
 - [.github/workflows/claude-code-review.yml](./.github/workflows/claude-code-review.yml) - レビュー設定
 
 ### 技術スタックドキュメント
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://react.dev/)
+- [Hono Documentation](https://hono.dev/)
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
 - [Meilisearch Documentation](https://www.meilisearch.com/docs)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
 ---
 
-**最終更新**: 2026年3月8日
+**最終更新**: 2026年3月9日

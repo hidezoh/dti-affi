@@ -107,9 +107,9 @@ jobs:
             - テストカバレッジと品質
 
             ## 3. アーキテクチャの観点
-            - Next.js 16のベストプラクティスに従っているか
-            - App Routerの適切な使用
-            - Server ComponentsとClient Componentsの適切な使い分け
+            - Hono SSR + Cloudflare Pagesのベストプラクティスに従っているか
+            - ルーティングとレイアウトの適切な使用
+            - サーバーサイドレンダリングの適切な実装
             - TypeScriptの型安全性の確保
             - Tailwind CSSの適切な活用
             - 既存のコードスタイルと一貫性があるか
@@ -119,28 +119,26 @@ jobs:
             - 将来の拡張性を考慮しているか
             - 技術的負債を生んでいないか
 
-            ## 5. Next.js 16/React/TypeScript固有の観点
-            - Server ComponentsとClient Componentsの適切な使い分け
+            ## 5. Hono/TypeScript固有の観点
+            - Hono SSRによるサーバーサイドレンダリングが適切か
             - TypeScriptの型定義が適切か
-            - Reactフックの適切な使用
+            - Meilisearch SDKの適切な使用
             - 適切なエラーハンドリングがされているか
-            - SSR/SSGの考慮事項
 
             ## 6. アフィリエイト管理アプリケーション固有の観点
-            - SQLite3データベースとの連携が適切か
-            - CSVデータ処理の実装が適切か
-            - データ分析機能の実装が適切か
-            - パフォーマンスの考慮
+            - Meilisearchとの連携が適切か
+            - CSVデータ処理・バッチ投入の実装が適切か
+            - パフォーマンスの考慮（エッジ実行、検索レスポンス時間）
             - ユーザビリティの向上
+            - アフィリエイトリンクの正しいリダイレクト
 
-            ## 7. データベース変更のレビュー観点
-            データベース関連の変更がある場合は、以下を確認してください：
-            - `sqlite3 data.db ".schema"` でスキーマを確認
-            - `sqlite3 data.db ".tables"` でテーブル一覧を確認
-            - マイグレーションスクリプトの妥当性
+            ## 7. データストア変更のレビュー観点
+            データストア関連の変更がある場合は、以下を確認してください：
+            - Meilisearchインデックス設定（src/lib/meilisearch.ts）の妥当性
+            - Cloudflare D1スキーマの妥当性
+            - バッチスクリプト（scripts/）の動作確認
             - 既存データとの互換性
-            - インデックスの適切な設定
-            - 外部キー制約の整合性
+            - 検索属性・フィルタ属性の適切な設定
 
             ## 8. Serena MCPによる高度な分析
             - コード変更の影響範囲分析：依存関係の影響を特定
@@ -158,5 +156,5 @@ jobs:
           use_sticky_comment: false
 
           # Serena MCPとレビューに必要なツールを追加
-          allowed_tools: "Bash(npm run lint),Bash(npm run build),Bash(npm run dev --dry-run),Bash(npm test),Bash(npm run test),Bash(sqlite3),Bash(sqlite3 data.db),Bash(sqlite3 data.db *),mcp__github__comment__update_claude_comment,mcp__github__create_issue,mcp__github__update_issue,mcp__serena__onboarding,mcp__serena__find_file,mcp__serena__list_dir,mcp__serena__find_symbol,mcp__serena__search_for_pattern,mcp__serena__get_symbols_overview,mcp__serena__find_referencing_symbols,mcp__serena__write_memory,mcp__serena__read_memory,mcp__serena__list_memories,mcp__serena__delete_memory,mcp__serena__activate_project,mcp__serena__switch_modes,mcp__serena__get_current_config,mcp__serena__check_onboarding_performed,mcp__serena__think_about_collected_information,mcp__serena__think_about_task_adherence,mcp__serena__think_about_whether_you_are_done,mcp__serena__prepare_for_new_conversation"
+          allowed_tools: "Bash(npm run lint),Bash(npm run build),Bash(npm run dev --dry-run),Bash(npm test),Bash(npm run test),mcp__github__comment__update_claude_comment,mcp__github__create_issue,mcp__github__update_issue,mcp__serena__onboarding,mcp__serena__find_file,mcp__serena__list_dir,mcp__serena__find_symbol,mcp__serena__search_for_pattern,mcp__serena__get_symbols_overview,mcp__serena__find_referencing_symbols,mcp__serena__write_memory,mcp__serena__read_memory,mcp__serena__list_memories,mcp__serena__delete_memory,mcp__serena__activate_project,mcp__serena__switch_modes,mcp__serena__get_current_config,mcp__serena__check_onboarding_performed,mcp__serena__think_about_collected_information,mcp__serena__think_about_task_adherence,mcp__serena__think_about_whether_you_are_done,mcp__serena__prepare_for_new_conversation"
 
