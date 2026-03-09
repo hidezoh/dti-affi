@@ -103,7 +103,7 @@ export const VIDEOS_INDEX_SETTINGS = {
   faceting: {
     maxValuesPerFacet: 200,
   },
-} as const;
+};
 
 // バッチサイズ（Meilisearchへの一括投入時）
 export const BATCH_SIZE = 1000;
