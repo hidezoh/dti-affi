@@ -1,46 +1,74 @@
 import { MeiliSearch } from 'meilisearch';
 import type { Video } from '../types/video.js';
-
-// Meilisearch接続設定
-const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST || 'http://localhost:7700';
-const MEILISEARCH_ADMIN_API_KEY = process.env.MEILISEARCH_ADMIN_API_KEY || '';
-const MEILISEARCH_SEARCH_API_KEY = process.env.MEILISEARCH_SEARCH_API_KEY || '';
+import type { Env } from '../types/env.js';
 
 // インデックス名
 export const VIDEOS_INDEX = 'videos';
 
-// 管理用クライアント（インデックス作成・データ投入用）
-export function createAdminClient(): MeiliSearch {
-  if (!MEILISEARCH_HOST) {
+// 検索用クライアント（Cloudflare Workers環境変数から取得）
+export function createSearchClient(env: Env): MeiliSearch {
+  if (!env.MEILISEARCH_HOST) {
     throw new Error('MEILISEARCH_HOST が設定されていません');
   }
-  if (!MEILISEARCH_ADMIN_API_KEY) {
+  return new MeiliSearch({
+    host: env.MEILISEARCH_HOST,
+    apiKey: env.MEILISEARCH_SEARCH_API_KEY || env.MEILISEARCH_ADMIN_API_KEY || '',
+  });
+}
+
+// 管理用クライアント（スクリプト用 - 環境変数から直接取得）
+export function createAdminClient(): MeiliSearch {
+  const host = process.env.MEILISEARCH_HOST || 'http://localhost:7700';
+  const apiKey = process.env.MEILISEARCH_ADMIN_API_KEY || '';
+  if (!host) {
+    throw new Error('MEILISEARCH_HOST が設定されていません');
+  }
+  if (!apiKey) {
     throw new Error('MEILISEARCH_ADMIN_API_KEY が設定されていません');
   }
-  return new MeiliSearch({
-    host: MEILISEARCH_HOST,
-    apiKey: MEILISEARCH_ADMIN_API_KEY,
-  });
+  return new MeiliSearch({ host, apiKey });
 }
 
-// 検索用クライアント（フロントエンド検索用）
-export function createSearchClient(): MeiliSearch {
-  if (!MEILISEARCH_HOST) {
-    throw new Error('MEILISEARCH_HOST が設定されていません');
+// 最新動画を取得
+export async function getLatestVideos(env: Env, limit = 24): Promise<Video[]> {
+  const client = createSearchClient(env);
+  const index = client.index(VIDEOS_INDEX);
+  const result = await index.search('', {
+    limit,
+    sort: ['release_date:desc'],
+  });
+  return result.hits as Video[];
+}
+
+// IDで動画を取得
+export async function getVideoById(env: Env, id: string): Promise<Video | null> {
+  const client = createSearchClient(env);
+  const index = client.index(VIDEOS_INDEX);
+  try {
+    const doc = await index.getDocument(id);
+    return doc as Video;
+  } catch {
+    return null;
   }
-  return new MeiliSearch({
-    host: MEILISEARCH_HOST,
-    apiKey: MEILISEARCH_SEARCH_API_KEY || MEILISEARCH_ADMIN_API_KEY,
-  });
 }
 
-// 共通型を再エクスポート（後方互換）
+// キーワードで動画を検索
+export async function searchVideos(env: Env, query: string, limit = 24): Promise<Video[]> {
+  const client = createSearchClient(env);
+  const index = client.index(VIDEOS_INDEX);
+  const result = await index.search(query, {
+    limit,
+    sort: ['release_date:desc'],
+  });
+  return result.hits as Video[];
+}
+
+// 共通型を再エクスポート
 export type { Video };
 export type { Video as MeilisearchVideo };
 
-// videosインデックスの設定
+// videosインデックスの設定（スクリプト用）
 export const VIDEOS_INDEX_SETTINGS = {
-  // 検索対象フィールド（優先度順）
   searchableAttributes: [
     'title',
     'actress',
@@ -48,7 +76,6 @@ export const VIDEOS_INDEX_SETTINGS = {
     'site_name',
     'provider_name',
   ],
-  // フィルタ可能フィールド
   filterableAttributes: [
     'site_id',
     'site_name',
@@ -56,11 +83,9 @@ export const VIDEOS_INDEX_SETTINGS = {
     'actress',
     'provider_name',
   ],
-  // ソート可能フィールド
   sortableAttributes: [
     'release_date',
   ],
-  // ランキングルール
   rankingRules: [
     'words',
     'typo',
@@ -69,7 +94,6 @@ export const VIDEOS_INDEX_SETTINGS = {
     'sort',
     'exactness',
   ],
-  // 表示対象フィールド
   displayedAttributes: [
     'id',
     'site_id',
@@ -84,22 +108,18 @@ export const VIDEOS_INDEX_SETTINGS = {
     'sample_movie_url_2',
     'provider_name',
   ],
-  // 日本語形態素解析（Lindera tokenizer）
   localizedAttributes: [
     {
       locales: ['jpn'],
       attributePatterns: ['title', 'actress', 'description', 'site_name', 'provider_name'],
     },
   ],
-  // タイポ許容設定（CJK文字では無効化）
   typoTolerance: {
     disableOnAttributes: ['title', 'actress', 'description', 'site_name', 'provider_name'],
   },
-  // ページネーション設定（119K件以上のデータセット対応）
   pagination: {
     maxTotalHits: 5000,
   },
-  // ファセット設定
   faceting: {
     maxValuesPerFacet: 200,
   },
