@@ -17,6 +17,7 @@ import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
 import { fileURLToPath } from 'url';
+import { MeiliSearch } from 'meilisearch';
 import {
   createAdminClient,
   VIDEOS_INDEX,
@@ -27,6 +28,10 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, '../data');
+
+// リトライ設定
+const MAX_RETRIES = 3;
+const INITIAL_BACKOFF_MS = 1000;
 
 // CSVレコードの型
 interface CsvRecord {
@@ -42,6 +47,33 @@ interface CsvRecord {
   original_id?: string;
   sample_movie_url_2?: string;
   provider_name?: string;
+}
+
+// リトライ付きバッチ投入
+async function addDocumentsWithRetry(
+  index: ReturnType<MeiliSearch['index']>,
+  batch: Video[],
+  batchNum: number,
+  totalBatches: number,
+): Promise<number> {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const task = await index.addDocuments(batch);
+      return task.taskUid;
+    } catch (error) {
+      if (attempt === MAX_RETRIES) {
+        console.error(`  バッチ ${batchNum}/${totalBatches}: ${MAX_RETRIES}回リトライ後も失敗`);
+        throw error;
+      }
+      const backoff = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1);
+      console.warn(
+        `  バッチ ${batchNum}/${totalBatches}: エラー発生（リトライ ${attempt}/${MAX_RETRIES}、${backoff}ms後に再試行）`,
+        error instanceof Error ? error.message : error,
+      );
+      await new Promise(resolve => setTimeout(resolve, backoff));
+    }
+  }
+  throw new Error('unreachable');
 }
 
 async function syncToMeilisearch() {
@@ -127,8 +159,8 @@ async function syncToMeilisearch() {
     const batch = allDocuments.slice(i, i + BATCH_SIZE);
 
     console.log(`  バッチ ${batchNum}/${totalBatches}（${batch.length}件）...`);
-    const task = await index.addDocuments(batch);
-    taskUids.push(task.taskUid);
+    const taskUid = await addDocumentsWithRetry(index, batch, batchNum, totalBatches);
+    taskUids.push(taskUid);
   }
 
   // 全タスクの完了を待つ
