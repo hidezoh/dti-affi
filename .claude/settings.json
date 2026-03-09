@@ -1,0 +1,59 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun x gh-setup-hooks",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "grep -q 'GH_HOST=github.com' ~/.bashrc 2>/dev/null || sed -i '/^# If not running interactively/i # GitHub CLI: ローカルプロキシ経由でもGitHubを認識させる\\nexport GH_HOST=github.com\\n' ~/.bashrc"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'file=\"$CLAUDE_FILE_PATH\"; if [[ \"$file\" =~ \\.(ts|tsx|vue)$ ]]; then grep -n \"console\\.log\" \"$file\" 2>/dev/null && echo \"⚠️ console.log が残っています（本番前に削除してください）\" || true; fi'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'file=\"$CLAUDE_FILE_PATH\"; if [[ \"$file\" =~ \\.(ts|tsx|vue|js|json|css)$ ]]; then npx prettier --write \"$file\" 2>/dev/null || true; fi'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -q 'git push'; then echo '🔍 git push を検出しました。変更内容を確認してください。'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-gh-command.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
