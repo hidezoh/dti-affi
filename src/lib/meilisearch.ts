@@ -84,7 +84,26 @@ export const VIDEOS_INDEX_SETTINGS = {
     'sample_movie_url_2',
     'provider_name',
   ],
-} as const;
+  // 日本語形態素解析（Lindera tokenizer）
+  localizedAttributes: [
+    {
+      locales: ['jpn'],
+      attributePatterns: ['title', 'actress', 'description', 'site_name', 'provider_name'],
+    },
+  ],
+  // タイポ許容設定（CJK文字では無効化）
+  typoTolerance: {
+    disableOnAttributes: ['title', 'actress', 'description', 'site_name', 'provider_name'],
+  },
+  // ページネーション設定（119K件以上のデータセット対応）
+  pagination: {
+    maxTotalHits: 5000,
+  },
+  // ファセット設定
+  faceting: {
+    maxValuesPerFacet: 200,
+  },
+};
 
 // バッチサイズ（Meilisearchへの一括投入時）
 export const BATCH_SIZE = 1000;

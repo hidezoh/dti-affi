@@ -6,11 +6,11 @@
 
 **プロジェクト名**: dti-affi
 **技術スタック**:
-- Hono SSR (hono/jsx) — Cloudflare Pages/Workers上で動作
+- Next.js 16 + React 19 — フルスタックフレームワーク
 - TypeScript 5
 - Tailwind CSS v4
-- Meilisearch Cloud (Build Plan) — 全文検索エンジン
-- Cloudflare D1 — クリックログ等の永続データ
+- Meilisearch Cloud (Build Plan) — 全文検索エンジン（日本語形態素解析対応）
+- SQLite (better-sqlite3) — ローカルデータベース
 - CSV処理 (csv-parse) — バッチデータ投入用
 
 **プロジェクトの目的**: アフィリエイト管理アプリケーション
@@ -57,27 +57,25 @@
 
 ---
 
-## 📋 Hono + Cloudflare 開発ルール
+## 📋 Next.js 開発ルール
 
 ### 実装順序
-Hono SSRアプリケーションの実装時は以下の順序で作業する：
+Next.jsアプリケーションの実装時は以下の順序で作業する：
 
 1. **依存関係の確認・追加** (`package.json`)
-2. **型定義の実装** (`types/`, `interfaces/`)
+2. **型定義の実装** (`src/types/`)
 3. **Meilisearchクライアント・ユーティリティの実装** (`src/lib/`)
-4. **Honoルートの実装** (`src/routes/` or `src/index.tsx`)
-5. **JSXコンポーネントの実装** (`src/components/`)
-6. **Cloudflare設定の調整** (`wrangler.toml`)
-7. **テストコードの作成**
-8. **統合とテスト実行**
+4. **ページの実装** (`src/app/`)
+5. **コンポーネントの実装** (`src/components/`)
+6. **テストコードの作成**
+7. **統合とテスト実行**
 
 ### ベストプラクティス
-- **Hono SSR (hono/jsx)**: サーバーサイドレンダリングでSEOを確保
-- **エッジ実行**: Cloudflare Workers上で動作し、0msコールドスタート
-- **データフェッチング**: Honoハンドラ内でMeilisearch SDKを使用
+- **Next.js App Router**: サーバーサイドレンダリングでSEOを確保
+- **データフェッチング**: Server Components内でMeilisearch SDKを使用
 - **スタイリング**: Tailwind CSSを活用
 - **SEO**: SSRによるHTML返却で検索エンジンクローラビリティを確保
-- **ルーティング**: Honoのルーターを使用（`app.get('/', ...)`, `app.get('/video/:id', ...)`）
+- **ルーティング**: Next.js App Routerのファイルベースルーティングを使用
 
 ---
 
@@ -87,9 +85,9 @@ Hono SSRアプリケーションの実装時は以下の順序で作業する：
 - 型安全性を重視し、`any`型の使用は最小限に留める
 - 適切な型定義を実装
 
-### Hono / JSX
-- hono/jsxを使用したSSRコンポーネントを実装
-- クライアントサイドのインタラクションは最小限に（バニラJS or Alpine.js等）
+### React / JSX
+- Next.js App RouterのServer Componentsを活用
+- クライアントコンポーネントは必要最小限に（`'use client'`）
 - 非同期処理では`async/await`を適切に使用
 
 ### エラーハンドリング
@@ -236,12 +234,11 @@ Hono SSRアプリケーションの実装時は以下の順序で作業する：
 - テストカバレッジと品質
 
 ### 3. アーキテクチャの観点
-- Hono SSRのベストプラクティスに従っているか
-- Honoルーティングの適切な使用
+- Next.js App Routerのベストプラクティスに従っているか
+- ルーティングとレイアウトの適切な使用
 - SSRによるSEO確保が維持されているか
 - TypeScriptの型安全性の確保
 - Tailwind CSSの適切な活用
-- Cloudflare Workers/Pages環境での動作互換性
 - 既存のコードスタイルと一貫性があるか
 
 ### 4. 個人開発における注意点
@@ -249,12 +246,11 @@ Hono SSRアプリケーションの実装時は以下の順序で作業する：
 - 将来の拡張性を考慮しているか
 - 技術的負債を生んでいないか
 
-### 5. Hono/Cloudflare/TypeScript固有の観点
-- Hono SSR (hono/jsx) によるサーバーサイドレンダリングが適切か
+### 5. Next.js/TypeScript固有の観点
+- Next.js App Routerによるサーバーサイドレンダリングが適切か
 - TypeScriptの型定義が適切か
 - Meilisearch SDKの適切な使用
 - 適切なエラーハンドリングがされているか
-- Cloudflare Workers環境での互換性（Node.js APIの制約に注意）
 
 ### 6. アフィリエイト管理アプリケーション固有の観点
 - Meilisearchとの連携が適切か
@@ -321,10 +317,8 @@ Hono SSRアプリケーションの実装時は以下の順序で作業する：
 - [.github/workflows/claude-code-review.yml](./.github/workflows/claude-code-review.yml) - レビュー設定
 
 ### 技術スタックドキュメント
-- [Hono Documentation](https://hono.dev/)
-- [Hono JSX Renderer](https://hono.dev/docs/middleware/builtin/jsx-renderer)
-- [Cloudflare Pages](https://developers.cloudflare.com/pages/)
-- [Cloudflare D1](https://developers.cloudflare.com/d1/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev/)
 - [Meilisearch Documentation](https://www.meilisearch.com/docs)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)

@@ -57,37 +57,65 @@ async function setupIndex() {
   // searchableAttributes
   console.log('  searchableAttributes を設定中...');
   const searchableTask = await index.updateSearchableAttributes(
-    VIDEOS_INDEX_SETTINGS.searchableAttributes as unknown as string[]
+    VIDEOS_INDEX_SETTINGS.searchableAttributes
   );
   await client.tasks.waitForTask(searchableTask.taskUid);
 
   // filterableAttributes
   console.log('  filterableAttributes を設定中...');
   const filterableTask = await index.updateFilterableAttributes(
-    VIDEOS_INDEX_SETTINGS.filterableAttributes as unknown as string[]
+    VIDEOS_INDEX_SETTINGS.filterableAttributes
   );
   await client.tasks.waitForTask(filterableTask.taskUid);
 
   // sortableAttributes
   console.log('  sortableAttributes を設定中...');
   const sortableTask = await index.updateSortableAttributes(
-    VIDEOS_INDEX_SETTINGS.sortableAttributes as unknown as string[]
+    VIDEOS_INDEX_SETTINGS.sortableAttributes
   );
   await client.tasks.waitForTask(sortableTask.taskUid);
 
   // rankingRules
   console.log('  rankingRules を設定中...');
   const rankingTask = await index.updateRankingRules(
-    VIDEOS_INDEX_SETTINGS.rankingRules as unknown as string[]
+    VIDEOS_INDEX_SETTINGS.rankingRules
   );
   await client.tasks.waitForTask(rankingTask.taskUid);
 
   // displayedAttributes
   console.log('  displayedAttributes を設定中...');
   const displayedTask = await index.updateDisplayedAttributes(
-    VIDEOS_INDEX_SETTINGS.displayedAttributes as unknown as string[]
+    VIDEOS_INDEX_SETTINGS.displayedAttributes
   );
   await client.tasks.waitForTask(displayedTask.taskUid);
+
+  // localizedAttributes（日本語形態素解析 - Lindera tokenizer）
+  console.log('  localizedAttributes を設定中（日本語形態素解析）...');
+  const localizedTask = await index.updateLocalizedAttributes(
+    VIDEOS_INDEX_SETTINGS.localizedAttributes
+  );
+  await client.tasks.waitForTask(localizedTask.taskUid);
+
+  // typoTolerance（CJKテキスト向け調整）
+  console.log('  typoTolerance を設定中...');
+  const typoTask = await index.updateTypoTolerance(
+    VIDEOS_INDEX_SETTINGS.typoTolerance
+  );
+  await client.tasks.waitForTask(typoTask.taskUid);
+
+  // pagination（大規模データセット対応）
+  console.log('  pagination を設定中...');
+  const paginationTask = await index.updatePagination(
+    VIDEOS_INDEX_SETTINGS.pagination
+  );
+  await client.tasks.waitForTask(paginationTask.taskUid);
+
+  // faceting（ファセット設定）
+  console.log('  faceting を設定中...');
+  const facetingTask = await index.updateFaceting(
+    VIDEOS_INDEX_SETTINGS.faceting
+  );
+  await client.tasks.waitForTask(facetingTask.taskUid);
 
   // 設定内容の確認
   console.log('\n=== 適用された設定 ===');
