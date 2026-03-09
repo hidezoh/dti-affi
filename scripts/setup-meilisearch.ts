@@ -12,6 +12,14 @@
  *   MEILISEARCH_ADMIN_API_KEY - 管理用APIキー
  */
 
+// HTTPS_PROXY環境変数が設定されている場合、Node.jsのfetchでプロキシを使用する
+if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+  const { ProxyAgent, setGlobalDispatcher } = await import('undici');
+  setGlobalDispatcher(
+    new ProxyAgent((process.env.HTTPS_PROXY || process.env.https_proxy)!)
+  );
+}
+
 import 'dotenv/config';
 import {
   createAdminClient,
