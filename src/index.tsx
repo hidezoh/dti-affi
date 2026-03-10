@@ -1,15 +1,52 @@
 import { Hono } from "hono";
-import type { Env } from "./types/env.js";
+import { ErrorPage } from "./components/ErrorPage.js";
 import { Layout } from "./components/Layout.js";
+import { Pagination } from "./components/Pagination.js";
 import { VideoCard } from "./components/VideoCard.js";
+import { SearchError } from "./lib/errors.js";
 import { getLatestVideos, getVideoById, searchVideos } from "./lib/meilisearch.js";
+import type { Env } from "./types/env.js";
 
 const app = new Hono<{ Bindings: Env }>();
 
-// トップページ（新着 or 検索結果）
+// グローバルエラーハンドラ
+app.onError((err, c) => {
+  console.error("アプリケーションエラー:", err);
+
+  const isSearchError = err instanceof SearchError;
+  const statusCode = isSearchError ? 503 : 500;
+  const message = isSearchError
+    ? "検索サービスに一時的な問題が発生しています。しばらく経ってから再度お試しください。"
+    : "予期しないエラーが発生しました。";
+
+  return c.html(
+    <Layout title="エラー - Velvet Lounge">
+      <ErrorPage statusCode={statusCode} message={message} />
+    </Layout>,
+    statusCode,
+  );
+});
+
+// トップページ（新着 or 検索結果 + ページネーション）
 app.get("/", async (c) => {
   const query = c.req.query("q");
-  const videos = query ? await searchVideos(c.env, query, 24) : await getLatestVideos(c.env, 24);
+  const pageParam = c.req.query("page");
+
+  // ページ番号のバリデーション
+  let page = Number(pageParam) || 1;
+  if (page < 1) page = 1;
+
+  const result = query
+    ? await searchVideos(c.env, query, page, 24)
+    : await getLatestVideos(c.env, page, 24);
+
+  // ページ番号が最大ページ数を超えている場合は最終ページへリダイレクト
+  if (result.totalPages > 0 && page > result.totalPages) {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    params.set("page", String(result.totalPages));
+    return c.redirect(`/?${params.toString()}`);
+  }
 
   return c.html(
     <Layout>
@@ -38,18 +75,25 @@ app.get("/", async (c) => {
         <section>
           <h2 class="text-xl font-semibold mb-6 text-zinc-100 border-l-4 border-purple-500 pl-3">
             {query ? `"${query}" の検索結果` : "新着動画"}
+            {result.totalHits > 0 && (
+              <span class="text-sm font-normal text-zinc-500 ml-2">({result.totalHits}件)</span>
+            )}
           </h2>
 
-          {videos.length === 0 ? (
+          {result.hits.length === 0 ? (
             <div class="text-center py-20 text-zinc-500">
               動画が見つかりませんでした。別のキーワードで検索してください。
             </div>
           ) : (
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {videos.map((video) => (
+              {result.hits.map((video) => (
                 <VideoCard key={video.id} video={video} />
               ))}
             </div>
+          )}
+
+          {result.totalPages > 1 && (
+            <Pagination currentPage={result.page} totalPages={result.totalPages} query={query} />
           )}
         </section>
       </main>

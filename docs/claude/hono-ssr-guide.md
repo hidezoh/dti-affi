@@ -36,3 +36,37 @@ Hono SSRアプリケーションの実装時は以下の順序で作業する：
 ### UI/UX
 - レスポンシブデザインの実装
 - ユーザビリティの向上
+
+## Hono JSX テスト時の注意点
+
+### コンポーネントの戻り値型
+- Hono JSX のコンポーネントは `Promise<HtmlEscapedString>` を返す（同期的な `JSX.Element` ではない）
+- テストでレンダリング結果を取得する場合は `await` が必須
+
+```typescript
+// 正しいパターン
+async function renderToString(element: ReturnType<typeof MyComponent>): Promise<string> {
+  const result = await element;
+  return result.toString();
+}
+
+it("テスト", async () => {
+  const html = await renderToString(<MyComponent />);
+  expect(html).toContain("期待する文字列");
+});
+```
+
+### クラスのモック
+- `vi.mock()` でクラス（`new` で呼ばれるもの）をモックする場合はアロー関数ではなく `class` 構文を使う
+
+```typescript
+// NG: アロー関数 → "is not a constructor" エラー
+vi.mock("meilisearch", () => ({
+  MeiliSearch: vi.fn(() => ({ index: mockIndex })),
+}));
+
+// OK: class構文
+vi.mock("meilisearch", () => ({
+  MeiliSearch: class { index = mockIndex; },
+}));
+```

@@ -48,8 +48,37 @@ export default {
 
 ### "Secret updated but Worker still uses old value"
 
-**Cause:** Cached in global scope or not redeployed  
+**Cause:** Cached in global scope or not redeployed
 **Solution:** Avoid global caching, redeploy after secret change
+
+### Secrets are empty strings despite being set via `wrangler secret put`
+
+**Cause:** `[vars]` section in `wrangler.toml`/`wrangler.jsonc` overrides secrets with empty strings. Even an empty `[vars]` section or commented-out keys can cause this.
+
+```toml
+# ❌ This overrides secrets with empty strings
+[vars]
+# MEILISEARCH_HOST = ""
+# MEILISEARCH_SEARCH_API_KEY = ""
+```
+
+**Solution:**
+1. Remove the `[vars]` section entirely if all values are managed via `wrangler secret`
+2. Use `wrangler secret bulk` for setting multiple secrets at once:
+```bash
+echo '{"KEY1":"value1","KEY2":"value2"}' | wrangler secret bulk
+```
+3. Use `.dev.vars` for local development (gitignored)
+
+**Debugging:** Add a temporary debug endpoint to check `c.env` values at runtime:
+```typescript
+// ⚠️ Temporary - remove before production
+app.get("/debug/env", (c) => {
+  return c.json({
+    host: c.env.MY_VAR ? "set" : "empty",
+  });
+});
+```
 
 ### "KV get() returns null for existing key"
 
