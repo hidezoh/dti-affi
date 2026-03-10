@@ -30,7 +30,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'file=\"$CLAUDE_FILE_PATH\"; if [[ \"$file\" =~ \\.(ts|tsx|vue|js|json|css)$ ]]; then npx prettier --write \"$file\" 2>/dev/null || true; fi'"
+            "command": "bash -c 'file=\"$CLAUDE_FILE_PATH\"; if [[ \"$file\" =~ \\.(ts|tsx|js|json|css)$ ]]; then npx @biomejs/biome format --write \"$file\" 2>/dev/null || true; fi'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'file=\"$CLAUDE_FILE_PATH\"; if [[ \"$file\" =~ \\.(ts|tsx)$ ]]; then npx oxlint \"$file\" 2>/dev/null || true; fi'"
           }
         ]
       }
