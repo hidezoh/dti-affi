@@ -1,0 +1,11 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{ts,tsx}"
+      run: npx oxlint {staged_files}
+    format-check:
+      glob: "*.{ts,tsx,json,css,md}"
+      run: npx @biomejs/biome check --no-errors-on-unmatched {staged_files}
+    typecheck:
+      run: npx tsc --noEmit
