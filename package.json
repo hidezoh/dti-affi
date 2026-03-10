@@ -11,6 +11,8 @@
     "lint": "oxlint",
     "format": "biome format --write .",
     "format:check": "biome format .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "meilisearch:setup": "tsx scripts/setup-meilisearch.ts",
     "meilisearch:sync": "tsx scripts/sync-to-meilisearch.ts"
   },
@@ -19,8 +21,8 @@
     "meilisearch": "^0.55.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250306.0",
     "@biomejs/biome": "^2.0.0",
+    "@cloudflare/workers-types": "^4.20250306.0",
     "@tailwindcss/cli": "^4",
     "@types/adm-zip": "^0.5.3",
     "@types/node": "^20",
@@ -34,6 +36,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5",
     "undici": "^7.22.0",
+    "vitest": "^4.0.18",
     "wrangler": "^4.0.0"
   }
 }
