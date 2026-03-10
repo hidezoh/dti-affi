@@ -3,7 +3,7 @@
  * パストラバーサル攻撃などのセキュリティ脆弱性をテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -36,7 +36,10 @@ describe("ZIP抽出セキュリティテスト", () => {
     dangerousFileNames.forEach((fileName) => {
       // path.basename() が安全なファイル名を返すことをテスト
       const sanitizedFileName = path.basename(fileName);
-      const containsTraversal = fileName.includes("..") || path.isAbsolute(fileName);
+      const containsTraversal =
+        fileName.includes("..") ||
+        path.isAbsolute(fileName) ||
+        /^[A-Za-z]:/.test(fileName); // Windowsドライブレターの検出
       const isSafe = sanitizedFileName === fileName && !containsTraversal;
 
       expect(isSafe).toBe(false);
