@@ -8,7 +8,7 @@ import { SearchError } from "./errors.js";
 export const VIDEOS_INDEX = "videos";
 
 // 検索タイムアウト（ミリ秒）
-const SEARCH_TIMEOUT_MS = 5000;
+const SEARCH_TIMEOUT_MS = 10000;
 
 // 検索用クライアント（Cloudflare Workers環境変数から取得）
 export function createSearchClient(env: Env): MeiliSearch {

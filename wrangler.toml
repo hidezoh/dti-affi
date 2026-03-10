@@ -10,10 +10,7 @@ main = "src/index.tsx"
 [assets]
 directory = "./public"
 
-# 環境変数（本番はCloudflareダッシュボードで設定）
-[vars]
-# MEILISEARCH_HOST = ""
-# MEILISEARCH_SEARCH_API_KEY = ""
+# 環境変数は wrangler secret で設定（MEILISEARCH_HOST, MEILISEARCH_SEARCH_API_KEY）
 
 # D1バインディング（将来用）
 # [[d1_databases]]
