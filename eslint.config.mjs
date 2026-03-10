@@ -11,6 +11,7 @@ export default tseslint.config(
       ".wrangler/**",
       "public/**",
       "scripts/**",
+      ".claude/**",
     ],
   },
 );
