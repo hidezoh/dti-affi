@@ -1,17 +1,15 @@
-import { Hono } from 'hono';
-import type { Env } from './types/env.js';
-import { Layout } from './components/Layout.js';
-import { VideoCard } from './components/VideoCard.js';
-import { getLatestVideos, getVideoById, searchVideos } from './lib/meilisearch.js';
+import { Hono } from "hono";
+import type { Env } from "./types/env.js";
+import { Layout } from "./components/Layout.js";
+import { VideoCard } from "./components/VideoCard.js";
+import { getLatestVideos, getVideoById, searchVideos } from "./lib/meilisearch.js";
 
 const app = new Hono<{ Bindings: Env }>();
 
 // トップページ（新着 or 検索結果）
-app.get('/', async (c) => {
-  const query = c.req.query('q');
-  const videos = query
-    ? await searchVideos(c.env, query, 24)
-    : await getLatestVideos(c.env, 24);
+app.get("/", async (c) => {
+  const query = c.req.query("q");
+  const videos = query ? await searchVideos(c.env, query, 24) : await getLatestVideos(c.env, 24);
 
   return c.html(
     <Layout>
@@ -31,7 +29,7 @@ app.get('/', async (c) => {
               name="q"
               type="text"
               placeholder="動画を検索..."
-              value={query || ''}
+              value={query || ""}
               class="w-full md:w-64 bg-zinc-900 border border-zinc-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-purple-500 transition-colors text-white"
             />
           </form>
@@ -39,7 +37,7 @@ app.get('/', async (c) => {
 
         <section>
           <h2 class="text-xl font-semibold mb-6 text-zinc-100 border-l-4 border-purple-500 pl-3">
-            {query ? `"${query}" の検索結果` : '新着動画'}
+            {query ? `"${query}" の検索結果` : "新着動画"}
           </h2>
 
           {videos.length === 0 ? (
@@ -55,13 +53,13 @@ app.get('/', async (c) => {
           )}
         </section>
       </main>
-    </Layout>
+    </Layout>,
   );
 });
 
 // 動画詳細ページ
-app.get('/video/:id', async (c) => {
-  const id = c.req.param('id');
+app.get("/video/:id", async (c) => {
+  const id = c.req.param("id");
   const video = await getVideoById(c.env, id);
 
   if (!video) {
@@ -77,7 +75,10 @@ app.get('/video/:id', async (c) => {
         {/* ナビゲーション */}
         <nav class="p-4 border-b border-zinc-800">
           <div class="max-w-7xl mx-auto flex items-center">
-            <a href="/" class="text-zinc-400 hover:text-white transition-colors flex items-center gap-2">
+            <a
+              href="/"
+              class="text-zinc-400 hover:text-white transition-colors flex items-center gap-2"
+            >
               ← ホームに戻る
             </a>
           </div>
@@ -90,11 +91,7 @@ app.get('/video/:id', async (c) => {
               {/* ビデオプレイヤー */}
               <div class="aspect-video bg-zinc-900 rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
                 {video.sample_movie_url_2 ? (
-                  <video
-                    controls
-                    class="w-full h-full"
-                    src={video.sample_movie_url_2}
-                  >
+                  <video controls class="w-full h-full" src={video.sample_movie_url_2}>
                     Your browser does not support the video tag.
                   </video>
                 ) : (
@@ -112,9 +109,7 @@ app.get('/video/:id', async (c) => {
                   <span class="text-purple-400 font-medium">{video.actress}</span>
                   <span>{video.site_name}</span>
                 </div>
-                <p class="text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                  {video.description}
-                </p>
+                <p class="text-zinc-300 leading-relaxed whitespace-pre-wrap">{video.description}</p>
               </div>
             </div>
 
@@ -137,14 +132,14 @@ app.get('/video/:id', async (c) => {
                 </a>
 
                 <div class="mt-6 pt-6 border-t border-zinc-800 text-xs text-zinc-500 text-center">
-                  ID: {video.id} • 提供: {video.provider_name || 'N/A'}
+                  ID: {video.id} • 提供: {video.provider_name || "N/A"}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </main>
-    </Layout>
+    </Layout>,
   );
 });
 
@@ -164,7 +159,7 @@ app.notFound((c) => {
           </a>
         </div>
       </main>
-    </Layout>
+    </Layout>,
   );
 });
 

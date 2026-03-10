@@ -1,4 +1,4 @@
-import type { Video } from '../types/video.js';
+import type { Video } from "../types/video.js";
 
 interface VideoCardProps {
   video: Video;
