@@ -174,7 +174,7 @@ async function syncToMeilisearch() {
   // 全タスクの完了を待つ
   console.log('\nインデックス処理の完了を待機中...');
   for (const taskUid of taskUids) {
-    const result = await client.tasks.waitForTask(taskUid);
+    const result = await client.tasks.waitForTask(taskUid, { timeout: 300_000 });
     if (result.status === 'failed') {
       console.error(`  タスク ${taskUid} が失敗: ${JSON.stringify(result.error)}`);
     }

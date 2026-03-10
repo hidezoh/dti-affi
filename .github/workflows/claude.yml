@@ -91,7 +91,7 @@ jobs:
           # assignee_trigger: "claude-bot"
 
           # Serena MCPと実装に必要なツールへのアクセスを拡張
-          allowed_tools: "Bash(npm run dev),Bash(npm run build),Bash(npm run lint),Bash(npm start),Bash(npm install),Bash(npm),Bash(npm test),Bash(npm run test),Bash(git status),Bash(git diff),Bash(git branch),Bash(git checkout),Bash(git fetch),Bash(git pull),Bash(git add),Bash(git commit),Bash(git push),Bash(git push --force-with-lease),Bash(sqlite3),Bash(sqlite3 data.db),Bash(sqlite3 data.db *),mcp__github__create_issue,mcp__github__update_issue,mcp__github__list_issues,mcp__github__get_issue,mcp__serena__*,FileEdit,FileCreate,FileRead"
+          allowed_tools: "Bash(npm run dev),Bash(npm run build),Bash(npm run lint),Bash(npm start),Bash(npm install),Bash(npm),Bash(npm test),Bash(npm run test),Bash(git status),Bash(git diff),Bash(git branch),Bash(git checkout),Bash(git fetch),Bash(git pull),Bash(git add),Bash(git commit),Bash(git push),Bash(git push --force-with-lease),mcp__github__create_issue,mcp__github__update_issue,mcp__github__list_issues,mcp__github__get_issue,mcp__serena__*,FileEdit,FileCreate,FileRead"
 
           # Serena MCPを活用した高度なカスタム指示
           custom_instructions: |
@@ -111,44 +111,40 @@ jobs:
             - エラーがある場合は先に修正してから新しい実装を開始する
             - 実装後も `npm run lint` で品質を確認する
 
-            # Next.js 16開発ルール
-            - Next.js 16アプリケーションの実装時は以下の順序で作業する：
+            # Hono SSR開発ルール
+            - Hono SSRアプリケーションの実装時は以下の順序で作業する：
               1. 必要な依存関係の確認・追加（package.json）
-              2. 型定義の実装（types/、interfaces/）
-              3. サーバーサイドAPIの実装（app/api/）
-              4. コンポーネントの実装（components/）
-              5. ページの実装（app/）
-              6. ユーティリティ関数の実装（lib/、utils/）
-              7. 設定の調整（next.config.ts）
-              8. テストコードの作成
-              9. 統合とテスト実行
+              2. 型定義の実装（src/types/）
+              3. Meilisearchクライアント・ユーティリティの実装（src/lib/）
+              4. ルートの実装（src/index.tsx）
+              5. コンポーネントの実装（src/components/）
+              6. テストコードの作成
+              7. 統合とテスト実行
 
             # コード品質要件
             - TypeScriptの型安全性を重視し、any型の使用は最小限に留める
-            - React Server Components と Client Components を適切に使い分ける
-            - リアクティブなデータはuseState、useEffectを適切に使用する
+            - Hono JSX（React互換）でコンポーネントを実装
+            - サーバーサイドでの完全レンダリング（クライアントJSは最小限）
             - 非同期処理ではasync/awaitを適切に使用する
             - エラーハンドリングを適切に実装する
 
-            # Next.js 16固有のベストプラクティス
-            - App Routerを使用した実装
-            - Server Componentsをデフォルトとし、必要な場合のみClient Componentsを使用
-            - データフェッチングはServer Componentsで行う
+            # Hono SSR固有のベストプラクティス
+            - Cloudflare Workers上でサーバーサイドレンダリング
+            - Honoルートハンドラ内でMeilisearch SDKを使用してデータフェッチング
             - Tailwind CSSを活用したスタイリング
-            - SEO対策を考慮したメタデータの設定
+            - SSRによるHTML返却でSEO確保
+            - 環境変数はCloudflare Worker Bindings（c.env）経由で取得
 
             # アフィリエイト管理アプリケーション固有の考慮事項
-            - SQLite3データベースとの連携を適切に実装
+            - Meilisearch Cloudを検索・動画データの取得に使用
             - CSVデータのインポート処理の最適化
             - データ分析とレポート生成の実装
             - レスポンシブデザインの実装
 
-            # SQLiteデータベースの活用
-            - データベーススキーマの確認：`sqlite3 data.db ".schema"` でテーブル構造を確認
-            - データの確認：`sqlite3 data.db "SELECT * FROM テーブル名 LIMIT 10;"` でサンプルデータを表示
-            - テーブル一覧：`sqlite3 data.db ".tables"` で全テーブルを確認
-            - データ分析時は既存のデータ構造を理解してから実装を開始
-            - 新規テーブル作成時は既存スキーマとの整合性を保つ
+            # Meilisearch検索の活用
+            - インデックス設定の確認：npm run meilisearch:setup
+            - CSVデータの投入：npm run meilisearch:sync
+            - 検索APIキーはブラウザに露出させず、Workers上でプロキシ
 
             # Serena MCPを活用した高度な分析
             - コード変更の影響範囲分析：`mcp__serena__search_for_pattern`を使用して依存関係を特定

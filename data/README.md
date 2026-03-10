@@ -9,13 +9,9 @@
 
 以下のファイルはGit LFSで管理され、リポジトリクローン時はポインタのみダウンロードされます：
 
-- **data.db** (約137MB): SQLiteデータベース本体
-  - アフィリエイトデータの集計・分析用データ
-  - テーブル構成: `/Users/katouhideyuki/development/dti-affi/CLAUDE.md`参照
-
 - **\*.csv** (合計約123MB): CSVデータファイル群
   - DTI Cashからダウンロードしたアフィリエイトレポート
-  - インポート処理で`data.db`に取り込まれる
+  - `npm run meilisearch:sync` でMeilisearch Cloudに投入される
 
 - **\*.pdf** (約2.7MB): 参考資料・マニュアル原本
   - `裏技(Ad tips).pdf`: 広告素材取得マニュアル原本
@@ -49,22 +45,16 @@ git commit -m "update: data files"
 git push
 ```
 
-## データベース操作
+## Meilisearch データ投入
 
-SQLiteデータベースの確認・操作コマンド：
+CSVデータをMeilisearch Cloudに投入する手順：
 
 ```bash
-# テーブル一覧
-sqlite3 data.db ".tables"
+# インデックス設定の初期化
+npm run meilisearch:setup
 
-# スキーマ確認
-sqlite3 data.db ".schema"
-
-# サンプルデータ確認
-sqlite3 data.db "SELECT * FROM テーブル名 LIMIT 10;"
-
-# SQLファイル実行
-sqlite3 data.db < script.sql
+# CSVデータの投入
+npm run meilisearch:sync
 ```
 
 ## ストレージ容量
@@ -74,7 +64,7 @@ GitHub LFSの無料枠：
 - 帯域幅: 1GB/月
 
 現在の使用状況：
-- 約268MB (data.db + CSV + PDF)
+- 約126MB (CSV + PDF)
 
 ## 注意事項
 
@@ -83,26 +73,11 @@ GitHub LFSの無料枠：
 - **バックアップ**: 重要なデータは定期的にバックアップを推奨
 - **LFS制限**: 大量のデータ追加時はLFS容量に注意
 
-## 開発時のヒント
-
-### データベースのバックアップ
-
-```bash
-# バックアップ作成
-cp data.db data.db.backup
-
-# 特定時点に復元
-git checkout <commit-hash> -- data.db
-git lfs pull
-```
-
-### CSVインポート
-
-アプリケーションのCSVインポート機能を使用：
+## CSVインポート
 
 1. DTI Cashからレポートをダウンロード
 2. `data/`ディレクトリに配置
-3. アプリケーションのインポート機能で取り込み
+3. `npm run meilisearch:sync` でMeilisearchに投入
 
 ## 関連ドキュメント
 
