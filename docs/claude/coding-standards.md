@@ -29,8 +29,19 @@
 - デプロイ: Cloudflare Pages / Workers の環境変数設定
 - 必要な環境変数: `MEILISEARCH_HOST`, `MEILISEARCH_SEARCH_API_KEY`, `MEILISEARCH_ADMIN_API_KEY`
 
+## Pre-commit Hook（Lefthook）
+- コミット前に `lefthook.yml` の内容を把握すること
+- `biome check`（import順序整理＋lint）と `biome format`（整形のみ）は別物
+- **コミット前は `npx @biomejs/biome check --write src/` で修正する**（`npm run format` だけでは不十分）
+
+## 外部SDKの型定義確認
+- 外部ライブラリのコンストラクタオプション等を推測で書かない
+- `node_modules/<pkg>/dist/types/` の型定義ファイルを先に確認する
+- 例: Meilisearch SDK の `Config` 型には `timeout` プロパティがある（`requestConfig` は存在しない）
+
 ## 実装完了時のチェックリスト
-1. `npm run lint` でエラー・警告がないことを確認
-2. `npm run build` でビルドが成功することを確認
-3. 不要なインポートやデバッグコードの削除
-4. 実装内容の動作確認
+1. `npx @biomejs/biome check --write src/` でフォーマット＋import順序を修正
+2. `npm run lint` でエラー・警告がないことを確認
+3. `npm run build` でビルドが成功することを確認
+4. 不要なインポートやデバッグコードの削除
+5. 実装内容の動作確認
