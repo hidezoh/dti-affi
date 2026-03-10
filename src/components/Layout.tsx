@@ -1,4 +1,4 @@
-import type { Child } from 'hono/jsx';
+import type { Child } from "hono/jsx";
 
 interface LayoutProps {
   title?: string;
@@ -7,7 +7,11 @@ interface LayoutProps {
 }
 
 // 共通HTMLレイアウト（<html>, <head>, <body>）
-export function Layout({ title = 'Velvet Lounge', description = '厳選されたプレミアムコンテンツ', children }: LayoutProps) {
+export function Layout({
+  title = "Velvet Lounge",
+  description = "厳選されたプレミアムコンテンツ",
+  children,
+}: LayoutProps) {
   return (
     <html lang="ja">
       <head>
@@ -17,9 +21,7 @@ export function Layout({ title = 'Velvet Lounge', description = '厳選された
         <meta name="description" content={description} />
         <link rel="stylesheet" href="/static/styles.css" />
       </head>
-      <body class="antialiased bg-black text-white">
-        {children}
-      </body>
+      <body class="antialiased bg-black text-white">{children}</body>
     </html>
   );
 }
