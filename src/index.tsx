@@ -3,6 +3,7 @@ import type { Env } from "./types/env.js";
 import { Layout } from "./components/Layout.js";
 import { VideoCard } from "./components/VideoCard.js";
 import { getLatestVideos, getVideoById, searchVideos } from "./lib/meilisearch.js";
+import { sanitizeAffiliateUrl } from "./lib/url-validator.js";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -68,6 +69,7 @@ app.get("/video/:id", async (c) => {
 
   const pageTitle = `${video.title} - Velvet Lounge`;
   const pageDescription = video.description || `${video.title} - ${video.actress}`;
+  const safeAffLink = sanitizeAffiliateUrl(video.aff_link);
 
   return c.html(
     <Layout title={pageTitle} description={pageDescription}>
@@ -121,15 +123,21 @@ app.get("/video/:id", async (c) => {
                   公式サイトで高画質・完全版をお楽しみください。
                 </p>
 
-                <a
-                  href={video.aff_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-center font-bold py-4 rounded-lg shadow-lg hover:shadow-purple-500/25 transition-all transform hover:-translate-y-0.5"
-                >
-                  今すぐ見る
-                  <span class="ml-2">→</span>
-                </a>
+                {safeAffLink ? (
+                  <a
+                    href={safeAffLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-center font-bold py-4 rounded-lg shadow-lg hover:shadow-purple-500/25 transition-all transform hover:-translate-y-0.5"
+                  >
+                    今すぐ見る
+                    <span class="ml-2">→</span>
+                  </a>
+                ) : (
+                  <div class="text-sm text-zinc-500 text-center py-4">
+                    リンクは現在利用できません
+                  </div>
+                )}
 
                 <div class="mt-6 pt-6 border-t border-zinc-800 text-xs text-zinc-500 text-center">
                   ID: {video.id} • 提供: {video.provider_name || "N/A"}

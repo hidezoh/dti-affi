@@ -32,6 +32,7 @@ import {
   BATCH_SIZE,
   type Video,
 } from '../src/lib/meilisearch.js';
+import { isValidAffiliateUrl } from '../src/lib/url-validator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,6 +113,7 @@ async function syncToMeilisearch() {
   // 全CSVファイルからドキュメントを収集
   const allDocuments: Video[] = [];
   let skippedCount = 0;
+  let invalidUrlCount = 0;
 
   for (const file of files) {
     console.log(`  読み込み中: ${file}`);
@@ -129,6 +131,12 @@ async function syncToMeilisearch() {
         continue;
       }
 
+      const affLink = record.aff_link || '';
+      if (affLink && !isValidAffiliateUrl(affLink)) {
+        invalidUrlCount++;
+        console.warn(`  警告: 不正なaff_link（movie_id=${record.movie_id}）: ${affLink}`);
+      }
+
       allDocuments.push({
         id: record.movie_id,
         site_id: record.site_id || '',
@@ -138,7 +146,7 @@ async function syncToMeilisearch() {
         description: record.description || '',
         release_date: record.release_date || '',
         sample_url: record.sample_url || '',
-        aff_link: record.aff_link || '',
+        aff_link: affLink,
         original_id: record.original_id || '',
         sample_movie_url_2: record.sample_movie_url_2 || '',
         provider_name: record.provider_name || '',
@@ -149,6 +157,9 @@ async function syncToMeilisearch() {
   console.log(`\n合計ドキュメント数: ${allDocuments.length}`);
   if (skippedCount > 0) {
     console.log(`スキップ数（movie_idなし）: ${skippedCount}`);
+  }
+  if (invalidUrlCount > 0) {
+    console.warn(`不正なaff_link数: ${invalidUrlCount}（表示時にリンク非表示）`);
   }
 
   if (allDocuments.length === 0) {
