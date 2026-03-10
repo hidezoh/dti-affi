@@ -869,6 +869,7 @@ curl http://localhost:8787/__scheduled
 | Type errors after config change | Run `wrangler types` |
 | Local storage not persisting | Check `.wrangler/state` directory |
 | Binding undefined in Worker | Verify binding name matches config exactly |
+| Secrets are empty strings at runtime | Remove `[vars]` section from config — it overrides `wrangler secret` values. Use `.dev.vars` for local dev |
 
 ### Debug Commands
 
