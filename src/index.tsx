@@ -1,60 +1,110 @@
 import { Hono } from "hono";
-import type { Env } from "./types/env.js";
+import { ErrorMessage } from "./components/ErrorMessage.js";
 import { Layout } from "./components/Layout.js";
+import { Pagination } from "./components/Pagination.js";
 import { VideoCard } from "./components/VideoCard.js";
 import { getLatestVideos, getVideoById, searchVideos } from "./lib/meilisearch.js";
+import type { Env } from "./types/env.js";
 
 const app = new Hono<{ Bindings: Env }>();
+
+// ページ番号をパースしバリデーション
+function parsePage(raw: string | undefined): number {
+  if (!raw) return 1;
+  const n = Number.parseInt(raw, 10);
+  if (Number.isNaN(n) || n < 1) return 1;
+  return n;
+}
 
 // トップページ（新着 or 検索結果）
 app.get("/", async (c) => {
   const query = c.req.query("q");
-  const videos = query ? await searchVideos(c.env, query, 24) : await getLatestVideos(c.env, 24);
+  const page = parsePage(c.req.query("page"));
 
-  return c.html(
-    <Layout>
-      <main class="min-h-screen p-8 max-w-7xl mx-auto">
-        <header class="mb-12 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
+  try {
+    const result = query
+      ? await searchVideos(c.env, query, page)
+      : await getLatestVideos(c.env, page);
+
+    // ページ範囲超過時は1ページ目にリダイレクト
+    if (page > result.totalPages && result.totalPages > 0) {
+      const redirectUrl = query ? `/?q=${encodeURIComponent(query)}` : "/";
+      return c.redirect(redirectUrl);
+    }
+
+    const baseUrl = query ? `/?q=${encodeURIComponent(query)}` : "/";
+
+    return c.html(
+      <Layout>
+        <main class="min-h-screen p-8 max-w-7xl mx-auto">
+          <header class="mb-12 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+              <a href="/" class="block">
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+                  Velvet Lounge
+                </h1>
+                <p class="text-zinc-400 text-sm mt-1">厳選されたプレミアムコンテンツ</p>
+              </a>
+            </div>
+
+            <form method="get" action="/" class="w-full md:w-auto">
+              <input
+                name="q"
+                type="text"
+                placeholder="動画を検索..."
+                value={query || ""}
+                class="w-full md:w-64 bg-zinc-900 border border-zinc-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-purple-500 transition-colors text-white"
+              />
+            </form>
+          </header>
+
+          <section>
+            <h2 class="text-xl font-semibold mb-6 text-zinc-100 border-l-4 border-purple-500 pl-3">
+              {query ? `"${query}" の検索結果` : "新着動画"}
+              {result.totalHits > 0 && (
+                <span class="text-sm font-normal text-zinc-400 ml-2">({result.totalHits}件)</span>
+              )}
+            </h2>
+
+            {result.hits.length === 0 ? (
+              <div class="text-center py-20 text-zinc-500">
+                動画が見つかりませんでした。別のキーワードで検索してください。
+              </div>
+            ) : (
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {result.hits.map((video) => (
+                  <VideoCard key={video.id} video={video} />
+                ))}
+              </div>
+            )}
+
+            <Pagination
+              currentPage={result.page}
+              totalPages={result.totalPages}
+              baseUrl={baseUrl}
+            />
+          </section>
+        </main>
+      </Layout>,
+    );
+  } catch (error) {
+    console.error("検索処理でエラー発生:", error);
+    return c.html(
+      <Layout>
+        <main class="min-h-screen p-8 max-w-7xl mx-auto">
+          <header class="mb-12">
             <a href="/" class="block">
               <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
                 Velvet Lounge
               </h1>
               <p class="text-zinc-400 text-sm mt-1">厳選されたプレミアムコンテンツ</p>
             </a>
-          </div>
-
-          <form method="get" action="/" class="w-full md:w-auto">
-            <input
-              name="q"
-              type="text"
-              placeholder="動画を検索..."
-              value={query || ""}
-              class="w-full md:w-64 bg-zinc-900 border border-zinc-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-purple-500 transition-colors text-white"
-            />
-          </form>
-        </header>
-
-        <section>
-          <h2 class="text-xl font-semibold mb-6 text-zinc-100 border-l-4 border-purple-500 pl-3">
-            {query ? `"${query}" の検索結果` : "新着動画"}
-          </h2>
-
-          {videos.length === 0 ? (
-            <div class="text-center py-20 text-zinc-500">
-              動画が見つかりませんでした。別のキーワードで検索してください。
-            </div>
-          ) : (
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {videos.map((video) => (
-                <VideoCard key={video.id} video={video} />
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-    </Layout>,
-  );
+          </header>
+          <ErrorMessage message="動画の取得中にエラーが発生しました。しばらくしてからもう一度お試しください。" />
+        </main>
+      </Layout>,
+    );
+  }
 });
 
 // 動画詳細ページ
@@ -160,6 +210,28 @@ app.notFound((c) => {
         </div>
       </main>
     </Layout>,
+  );
+});
+
+// グローバルエラーハンドラ
+app.onError((err, c) => {
+  console.error("サーバーエラー:", err);
+  return c.html(
+    <Layout title="エラー - Velvet Lounge">
+      <main class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+          <h1 class="text-6xl font-bold text-zinc-700 mb-4">500</h1>
+          <p class="text-zinc-400 mb-8">サーバーエラーが発生しました</p>
+          <a
+            href="/"
+            class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-500 hover:to-pink-500 transition-all"
+          >
+            ホームに戻る
+          </a>
+        </div>
+      </main>
+    </Layout>,
+    500,
   );
 });
 
